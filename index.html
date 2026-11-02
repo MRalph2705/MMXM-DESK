@@ -1194,7 +1194,13 @@ function renderLesson(id) {
   view.innerHTML = h;
   $("#doneBox").onchange = e => { const dd = done(); dd[l.id] = e.target.checked; LS.set("done", dd); toast(e.target.checked ? "Marked complete" : "Marked not complete"); };
 }
-function videoEl(v) { return `<video controls preload="none" playsinline poster="${VIDEO_BASE}${v.id}.jpg" src="${VIDEO_BASE}${v.id}.mp4" onerror="this.outerHTML='<div class=vmissing>Video not available offline. Open the app online to watch.</div>'"></video>`; }
+function videoEl(v) { return `<video controls preload="none" playsinline poster="${VIDEO_BASE}${v.id}.jpg" src="${VIDEO_BASE}${v.id}.mp4" data-vid="${v.id}" onerror="window.vidFallback(this)"></video>`; }
+window.vidFallback = function (el) {
+  const id = el.dataset.vid, tried = +(el.dataset.tried || 0);
+  const bases = [VIDEO_BASE, "", "./videos/"];
+  if (tried + 1 < bases.length) { el.dataset.tried = tried + 1; el.poster = bases[tried + 1] + id + ".jpg"; el.src = bases[tried + 1] + id + ".mp4"; return; }
+  el.outerHTML = `<div class="vmissing">Video file not found: ${id}.mp4. Upload it into a folder called videos next to index.html.</div>`;
+};
 
 /* ---------------- PLAYBOOK ---------------- */
 function todayKey() { const p = nyParts(); return `${p.y}-${pad(p.mo)}-${pad(p.d)}`; }
