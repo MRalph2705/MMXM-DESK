@@ -1,0 +1,1480 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style><title>MMXM Trader's Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#0B0F17"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><script>window.PWA_STANDALONE=true</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: app shell — left rail (desktop) / bottom tabs (phone), one reading column, chart panels as the hero objects */
+:root {
+  --bg: #F2F4F7; --surface: #FFFFFF; --surface2: #E9EDF3; --line: #D3D9E3;
+  --fg: #121826; --muted: #586377; --gold: #A8730C; --gold-soft: #F6E7C6;
+  --bull: #0F8E6C; --bear: #C3363E; --blue: #2C66D6; --chart: #0E121C; --chart-fg: #E8ECF4; --chart-muted:#8C97AB;
+  --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B0F17; --surface: #131927; --surface2: #1A2233; --line: #273146;
+  --fg: #E6EAF2; --muted: #8B96AA; --gold: #F0B952; --gold-soft: #3A2E15;
+  --bull: #3FC4A0; --bear: #EE6168; --blue: #6C9FFA; --chart: #0E121C; --chart-fg: #E8ECF4; --chart-muted:#8C97AB; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0B0F17; --surface: #131927; --surface2: #1A2233; --line: #273146;
+  --fg: #E6EAF2; --muted: #8B96AA; --gold: #F0B952; --gold-soft: #3A2E15;
+  --bull: #3FC4A0; --bear: #EE6168; --blue: #6C9FFA; --chart: #0E121C; --chart-fg: #E8ECF4; --chart-muted:#8C97AB; color-scheme: dark }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.6 var(--body); margin: 0; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--surface); }
+* { box-sizing: border-box; }
+h1, h2, h3 { font-family: var(--display); font-stretch: 88%; letter-spacing: -0.01em; text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 800; }
+h2 { font-size: 22px; font-weight: 750; }
+h3 { font-size: 16px; font-weight: 700; font-stretch: 95%; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.eyebrow { font: 600 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+.muted { color: var(--muted); }
+
+/* shell */
+.shell { display: grid; grid-template-columns: 228px minmax(0, 1fr); min-height: 100%; }
+.rail { position: sticky; top: env(safe-area-inset-top, 0px); height: 100vh; border-right: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; gap: 6px; padding: 20px 14px; padding-left: max(14px, env(safe-area-inset-left, 0px)); }
+.brand { display: flex; gap: 10px; align-items: center; padding: 4px 8px 18px; }
+.brand svg { flex: none; }
+.brand b { font: 850 17px/1.05 var(--display); font-stretch: 80%; letter-spacing: .01em; text-transform: uppercase; }
+.brand small { display: block; font: 500 11px/1.3 var(--mono); color: var(--muted); letter-spacing: .04em; }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav a { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; color: var(--muted); text-decoration: none; font-weight: 500; }
+.nav a:hover { background: var(--surface2); color: var(--fg); }
+.nav a[aria-current="page"] { background: var(--surface2); color: var(--fg); box-shadow: inset 3px 0 0 var(--gold); }
+.nav svg { width: 18px; height: 18px; flex: none; }
+.clock { margin-top: auto; border: 1px solid var(--line); border-radius: var(--r); padding: 12px; display: grid; gap: 6px; }
+.clock .t { font: 500 22px/1 var(--mono); font-variant-numeric: tabular-nums; }
+.kz { display: inline-flex; align-items: center; gap: 6px; font: 600 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 5px 8px; border-radius: 99px; background: var(--surface2); color: var(--muted); width: fit-content; }
+.kz.on { background: var(--gold-soft); color: var(--gold); }
+.kz i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.themebtn { border: 1px solid var(--line); background: none; border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--muted); }
+
+main { min-width: 0; padding-block: 28px 120px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.col { max-width: 920px; margin: 0 auto; display: grid; gap: 28px; }
+.topclock { display: none; }
+
+/* cards & lists */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; }
+.mod { display: grid; gap: 12px; }
+.mod-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.lessons { display: grid; gap: 0; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.lrow { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 13px 16px; border-top: 1px solid var(--line); text-decoration: none; color: inherit; }
+.lrow:first-child { border-top: 0; }
+.lrow:hover { background: var(--surface2); }
+.lrow .n { font: 500 13px var(--mono); color: var(--muted); }
+.lrow .tt { font-weight: 600; }
+.lrow .sub { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.done-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; }
+.done-dot.on { background: var(--bull); border-color: var(--bull); }
+.done-dot.on::after { content: ""; width: 8px; height: 4px; border: 2px solid var(--surface); border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); }
+.bridge { font: 600 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--blue); border: 1px solid currentColor; border-radius: 4px; padding: 3px 5px; margin-left: 6px; vertical-align: 2px; }
+.progress { height: 6px; border-radius: 99px; background: var(--surface2); overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--gold); }
+.hero { display: grid; gap: 14px; }
+.hero p { max-width: 62ch; color: var(--muted); font-size: 16px; }
+.path { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.path a { text-decoration: none; color: inherit; border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--surface); display: grid; gap: 4px; }
+.path a b { font: 700 13px/1.2 var(--display); font-stretch: 92%; }
+.path a span { font: 500 11px var(--mono); color: var(--muted); }
+.path a:hover { border-color: var(--gold); }
+
+/* lesson */
+.crumbs { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.crumbs a { color: var(--muted); }
+.lead { font-size: 18px; line-height: 1.5; max-width: 62ch; }
+.src { font: 500 12px/1.4 var(--mono); color: var(--muted); }
+.chartbox { background: var(--chart); border-radius: var(--r); padding: 10px 10px 6px; color: var(--chart-fg); overflow-x: auto; }
+.chartbox svg { display: block; width: 100%; min-width: 560px; height: auto; }
+.chartbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 4px 6px 8px; flex-wrap: wrap; }
+.chartbar b { font: 700 14px var(--display); font-stretch: 92%; color: var(--chart-fg); }
+.chartbar button { background: #1E2738; border: 1px solid #2F3A52; color: var(--chart-fg); border-radius: 6px; padding: 4px 10px; font-size: 12px; }
+.sec { display: grid; gap: 10px; }
+.defs { display: grid; grid-template-columns: minmax(140px, 220px) minmax(0, 1fr); border-top: 1px solid var(--line); }
+.defs dt, .defs dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.defs dt { font-weight: 600; padding-right: 16px; }
+.rules { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.rules li { padding-left: 22px; position: relative; max-width: 70ch; }
+.rules li::before { content: ""; position: absolute; left: 4px; top: .62em; width: 8px; height: 8px; border: 2px solid var(--gold); transform: rotate(45deg); }
+.proc { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: 0; border-left: 2px solid var(--line); margin-left: 12px; }
+.proc li { counter-increment: s; position: relative; padding: 6px 0 12px 26px; max-width: 70ch; }
+.proc li::before { content: counter(s); position: absolute; left: -13px; top: 4px; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); border: 2px solid var(--gold); font: 600 11px/20px var(--mono); text-align: center; color: var(--gold); }
+.warn { border: 1px solid var(--bear); border-left-width: 4px; border-radius: 8px; padding: 12px 14px; display: grid; gap: 6px; }
+.warn b { color: var(--bear); font: 600 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.check { display: flex; gap: 14px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 9px 14px; font-weight: 600; display: inline-flex; gap: 8px; align-items: center; text-decoration: none; color: inherit; }
+.btn:hover { border-color: var(--fg); }
+.btn.pri { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.btn.gold { background: var(--gold); color: #1A1204; border-color: var(--gold); }
+.btn.sm { padding: 6px 10px; font-size: 13px; }
+.btn.danger { color: var(--bear); border-color: var(--bear); }
+.navpair { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+video { width: 100%; border-radius: var(--r); background: #000; display: block; aspect-ratio: 16/9; max-width: 100%; }
+
+/* playbook */
+.phase { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; padding: 16px 0; border-top: 1px solid var(--line); }
+.phase .when { font: 600 11px/1.3 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding-top: 4px; }
+.phase .body { display: grid; gap: 8px; min-width: 0; }
+.tick { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.tick input { width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--gold); flex: none; }
+.tick input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.out { font: 500 12px/1.4 var(--mono); color: var(--gold); }
+.times { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tz { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: var(--surface); display: grid; gap: 2px; }
+.tz b { font: 700 14px var(--display); font-stretch: 92%; }
+.tz .mono { font-size: 13px; }
+.calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+label.f { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+.inp { width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 9px 10px; min-width: 0; }
+textarea.inp { min-height: 84px; resize: vertical; }
+.result { display: flex; gap: 22px; flex-wrap: wrap; align-items: baseline; padding: 14px; border-radius: 8px; background: var(--surface2); }
+.result .big { font: 600 28px/1 var(--mono); font-variant-numeric: tabular-nums; }
+
+/* videos */
+.vgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.vcard { display: grid; gap: 8px; }
+.vcard .meta { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.vcard a { font-size: 13px; color: var(--muted); }
+.vmissing { aspect-ratio: 16/9; border-radius: var(--r); background: var(--chart); color: var(--chart-muted); display: grid; place-items: center; font-size: 13px; padding: 16px; text-align: center; }
+
+/* journal */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.stat { padding: 14px 16px; border-left: 1px solid var(--line); display: grid; gap: 2px; }
+.stat:first-child { border-left: 0; }
+.stat b { font: 600 24px/1.1 var(--mono); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--muted); }
+.eq { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; }
+.eq svg { width: 100%; height: 140px; display: block; }
+.jlist { display: grid; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.jrow { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 12px 14px; border-top: 1px solid var(--line); cursor: pointer; background: none; border-left: 0; border-right: 0; border-bottom: 0; text-align: left; width: 100%; }
+.jrow:first-child { border-top: 0; }
+.jrow:hover { background: var(--surface2); }
+.pill { font: 600 11px/1 var(--mono); padding: 5px 8px; border-radius: 99px; background: var(--surface2); color: var(--muted); white-space: nowrap; }
+.pill.win { background: color-mix(in srgb, var(--bull) 18%, transparent); color: var(--bull); }
+.pill.loss { background: color-mix(in srgb, var(--bear) 18%, transparent); color: var(--bear); }
+.pill.gold { background: var(--gold-soft); color: var(--gold); }
+.steps { display: flex; gap: 6px; flex-wrap: wrap; position: sticky; top: env(safe-area-inset-top, 0px); background: var(--bg); padding: 10px 0; z-index: 5; }
+.steps button { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.steps button[aria-current="step"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.steps button .c { font-family: var(--mono); font-size: 11px; margin-left: 4px; opacity: .7; }
+.field { display: grid; gap: 8px; padding: 16px 0; border-top: 1px solid var(--line); }
+.field:first-of-type { border-top: 0; }
+.field .lab { font-weight: 600; font-size: 15px; display: flex; gap: 8px; align-items: baseline; }
+.field .lab .ok { color: var(--bull); font-size: 13px; }
+.hint { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 2px 8px; font-size: 13px; color: var(--muted); }
+.hint b { font: 600 10px/1.9 var(--mono); letter-spacing: .1em; color: var(--gold); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 6px 12px; font-size: 13px; }
+.chip[aria-pressed="true"] { background: var(--gold-soft); border-color: var(--gold); color: var(--fg); font-weight: 600; }
+.drop { border: 1.5px dashed var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 10px; }
+.drop.over { border-color: var(--gold); }
+.thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
+.thumb { position: relative; width: 150px; max-width: 100%; aspect-ratio: 16/10; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); background: var(--surface2); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb button { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.65); color: #fff; border: 0; border-radius: 4px; font-size: 12px; padding: 2px 6px; }
+.formnav { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; position: sticky; bottom: 0; padding: 12px 0; background: var(--bg); border-top: 1px solid var(--line); }
+.calcR { font: 500 13px var(--mono); color: var(--muted); }
+.viewimgs { display: grid; gap: 10px; }
+.viewimgs img { border-radius: 8px; border: 1px solid var(--line); width: 100%; }
+.kv { display: grid; grid-template-columns: minmax(120px, 200px) minmax(0, 1fr); border-top: 1px solid var(--line); }
+.kv div { padding: 8px 0; border-bottom: 1px solid var(--line); min-width: 0; overflow-wrap: anywhere; }
+.kv div:nth-child(odd) { color: var(--muted); font-size: 13px; padding-right: 12px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(90px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; z-index: 50; }
+.confirm { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 10px 12px; border: 1px solid var(--bear); border-radius: 8px; }
+.search { max-width: 360px; }
+.gl { display: grid; grid-template-columns: minmax(110px, 180px) minmax(0, 1fr); border-top: 1px solid var(--line); }
+.gl dt, .gl dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.gl dt { font: 600 14px var(--mono); }
+.empty { display: grid; gap: 14px; padding: 22px; border: 1px dashed var(--line); border-radius: var(--r); }
+.three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.three div { border-radius: 8px; background: var(--surface2); padding: 12px; display: grid; gap: 4px; font-size: 13px; }
+.three b { font: 700 14px var(--display); font-stretch: 92%; }
+.status { font: 500 12px var(--mono); color: var(--muted); }
+
+@media (max-width: 860px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: fixed; top: auto; bottom: 0; left: 0; right: 0; height: auto; z-index: 20; flex-direction: row; padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); border-right: 0; border-top: 1px solid var(--line); }
+  .brand, .rail .clock, .rail .themebtn { display: none; }
+  .nav { flex-direction: row; width: 100%; justify-content: space-around; }
+  .nav a { flex-direction: column; gap: 2px; font-size: 11px; padding: 6px 4px; flex: 1; text-align: center; }
+  .nav a[aria-current="page"] { box-shadow: inset 0 3px 0 var(--gold); }
+  main { padding-block: 0 110px; }
+  .topclock { display: flex; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); border-bottom: 1px solid var(--line); margin: 0 calc(-1 * max(16px, env(safe-area-inset-right, 0px))) 18px calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); justify-content: space-between; align-items: center; gap: 10px; }
+  .topclock b { font: 850 15px/1 var(--display); font-stretch: 80%; text-transform: uppercase; }
+  .topclock .t { font: 500 13px var(--mono); }
+  .path { display: none; }
+  .vgrid, .times, .three { grid-template-columns: minmax(0, 1fr); }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat:nth-child(3) { border-left: 0; } .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .phase { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .defs, .gl, .kv { grid-template-columns: minmax(0, 1fr); }
+  .defs dt, .gl dt { border-bottom: 0; padding-bottom: 0; }
+  .kv div:nth-child(odd) { border-bottom: 0; padding-bottom: 0; }
+  .jrow { grid-template-columns: minmax(0, 1fr) auto; }
+  .jrow .d { grid-column: 1 / -1; }
+  .formnav { bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+</head><body><div class="shell">
+  <aside class="rail">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="3" y="9" width="5" height="12" rx="1" fill="var(--bear)"/><line x1="5.5" y1="5" x2="5.5" y2="25" stroke="var(--bear)" stroke-width="1.6"/><rect x="12.5" y="12" width="5" height="10" rx="1" fill="var(--bull)"/><line x1="15" y1="8" x2="15" y2="26" stroke="var(--bull)" stroke-width="1.6"/><rect x="22" y="4" width="5" height="12" rx="1" fill="var(--bull)"/><line x1="24.5" y1="2" x2="24.5" y2="19" stroke="var(--bull)" stroke-width="1.6"/><line x1="1" y1="17" x2="29" y2="17" stroke="var(--gold)" stroke-width="1.4" stroke-dasharray="2.5 2"/></svg>
+      <div><b>MMXM Desk</b><small>course · playbook · journal</small></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="clock" id="clock"></div>
+    <button class="themebtn" id="themeBtn" type="button">Theme: system</button>
+  </aside>
+  <main>
+    <div class="topclock" id="topclock"></div>
+    <div class="col" id="view"></div>
+  </main>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script>
+/* Course content. Writing style: ~80% ASD-STE100 — short sentences, active voice,
+   one instruction per sentence, imperative for procedures, one word = one meaning. */
+const MODULES = [
+  { id: "m0", name: "Start here", blurb: "What this course is. How to use this app." },
+  { id: "m1", name: "Core concepts", blurb: "The tools you use in every model. Learn them in this order." },
+  { id: "m2", name: "Market maker models", blurb: "Find the model on the aligned timeframe. Trade it with mitigation blocks and the Silver Bullet." },
+  { id: "m3", name: "Top-down analysis", blurb: "Why price moves, how it gets there, and where you enter." },
+  { id: "m4", name: "Models & risk", blurb: "Complete trade models and the funded-account risk plan." },
+];
+
+const LESSONS = [
+  /* ---------------- M0 ---------------- */
+  {
+    id: "intro", m: "m0", title: "Course map", src: "1. Intro (1:47)", video: "v1",
+    summary: "This course teaches one complete method. You learn the tools first. Then you learn the models that use them.",
+    what: [
+      ["Source", "The MMXM Traders mentorship. All concepts come from the Inner Circle Trader (ICT)."],
+      ["Prerequisite", "The ICT 2022 mentorship. Study it first if you do not know fair value gaps, order blocks and market structure."],
+    ],
+    rules: [
+      "Learn the core concepts in the order given. Each lesson uses the lesson before it.",
+      "Do the self-check at the end of each lesson. Do not continue until you can answer it.",
+      "Backtest each concept on 20 charts before you use it with money.",
+      "Use the Journal tab for each backtest and each live trade.",
+    ],
+    steps: [
+      "Read the lesson card.",
+      "Watch the short explainer video.",
+      "Open the source video at the times given. Watch the chart examples.",
+      "Find 5 examples on your own charts. Log them in the Journal as type Backtest.",
+      "Mark the lesson as complete.",
+    ],
+    mistakes: ["Do not skip to the models. The models do not work without the core concepts."],
+    check: ["Which three sections does the course have after the core concepts?"],
+  },
+
+  /* ---------------- M1 ---------------- */
+  {
+    id: "po3", m: "m1", title: "Power of 3 (OHLC / OLHC)", src: "2. OHLC & OLHC – Power of 3 (10:14)", video: "v2",
+    diagram: "po3_bull", diagram2: "po3_bear",
+    summary: "Each day has three parts: accumulation, manipulation, distribution. Use the midnight open to find them.",
+    what: [
+      ["True day open", "00:00 New York time. The algorithm starts its day here. This is the midnight opening price."],
+      ["OLHC (bullish day)", "Open, then Low, then High, then Close. Price drops below the open first. Then it expands up."],
+      ["OHLC (bearish day)", "Open, then High, then Low, then Close. Price rises above the open first. Then it expands down."],
+      ["Reversal candle", "A long wick on one side. The wick ran liquidity or hit a higher-timeframe PD array."],
+      ["Indecision candle", "Equal wicks. Price stays near the midnight open all day. Do not trade it."],
+    ],
+    rules: [
+      "Draw the midnight opening price on each intraday chart. Extend it to the end of the day.",
+      "If you are bullish, buy below the midnight open.",
+      "If you are bearish, sell above the midnight open.",
+      "London often makes the high or low of the day. New York then retraces and continues.",
+      "A New York reversal day needs a higher-timeframe PD array or a liquidity run.",
+    ],
+    steps: [
+      "Find the daily bias first (Top-down analysis).",
+      "Draw a vertical line at 00:00 New York.",
+      "Draw a horizontal line at the 00:00 opening price.",
+      "Bullish: wait for price to trade below the line. Bearish: wait for price to trade above the line.",
+      "Look for your entry only on that side of the line.",
+    ],
+    mistakes: [
+      "Do not buy above the midnight open on a bullish day. You buy at a premium.",
+      "Do not use the 17:00 daily open for this model. Use 00:00 New York.",
+    ],
+    check: ["On a bearish day, which side of the midnight open do you sell from?", "What does a long lower wick on a daily candle tell you?"],
+  },
+  {
+    id: "failure", m: "m1", title: "Failure swings: low & high resistance liquidity", src: "3. Failure Swings – Low Resistance Liquidity (9:44)", video: "v3",
+    diagram: "failure",
+    summary: "Price cuts through weak highs and lows with ease. It struggles at highs and lows that already ran and rejected.",
+    what: [
+      ["Failure swing", "A swing high that fails to take the previous swing high. Or a swing low that fails to take the previous swing low."],
+      ["Low-resistance liquidity (LRL)", "Failure swings, equal highs, equal lows, trend lines. Price moves through them easily. They are targets."],
+      ["High-resistance liquidity (HRL)", "A high or low that ran a previous high or low and then rejected at once. Price struggles to go through it again."],
+    ],
+    rules: [
+      "Bullish: look for bearish failure swings (lower highs) above price. These are your targets.",
+      "Bearish: look for bullish failure swings (higher lows) below price. These are your targets.",
+      "On your side of the structure, you want to see high-resistance liquidity.",
+      "Failure swings that sit in premium (for a sell) or in discount (for a buy) are better targets.",
+    ],
+    steps: [
+      "Mark each swing high that is lower than the swing high before it.",
+      "Mark each swing low that is higher than the swing low before it.",
+      "Mark equal highs, equal lows and trend-line touches.",
+      "Find the most recent low (bullish) or high (bearish) that ran liquidity and rejected. This is your protected level.",
+      "Set your target at the low-resistance liquidity.",
+    ],
+    mistakes: ["Do not target a level that already ran and rejected. It is high resistance."],
+    check: ["You are bullish. Where do you look for low-resistance liquidity?"],
+  },
+  {
+    id: "pdhl", m: "m1", title: "Previous day highs & lows", src: "4. Previous Day Highs & Lows (11:46)", video: "v3",
+    diagram: "pdhl",
+    summary: "Almost every daily candle takes the previous day's high or low. This is the easiest draw on liquidity.",
+    what: [
+      ["PDH / PDL", "Previous day high and previous day low. Buy stops rest above the PDH. Sell stops rest below the PDL."],
+      ["Inside day", "A day that does not take the PDH or the PDL. It is rare."],
+    ],
+    rules: [
+      "In bullish order flow, target the previous day high.",
+      "In bearish order flow, target the previous day low.",
+      "A break of structure is stronger when an old low (or high) was run first.",
+      "If price trades below the midnight open and makes the low in London, expect the PDH to be run.",
+      "If the Asian range is very large, price does not need to go above (or below) the midnight open.",
+    ],
+    steps: [
+      "Mark the PDH and the PDL each day.",
+      "Mark the 00:00 New York vertical line for each day of the week.",
+      "Check the daily order flow.",
+      "Choose the PDH (bullish) or the PDL (bearish) as the first target.",
+    ],
+    mistakes: ["Do not trade against the daily order flow because a PDH or PDL is near."],
+    check: ["What three lines does the lesson say to have on every chart?"],
+  },
+  {
+    id: "swing4", m: "m1", title: "Daily swing highs & lows (day 4 model)", src: "5. Daily Swing Highs & Lows (9:33)", video: "v4",
+    diagram: "swing4",
+    summary: "A three-day swing pattern at a key level gives one high-probability day: day 4. Day 5 is the second chance.",
+    what: [
+      ["Swing low", "Three daily candles. The middle candle has the lowest low."],
+      ["Swing high", "Three daily candles. The middle candle has the highest high."],
+      ["Key level", "A higher-timeframe PD array: FVG, order block, breaker, volume imbalance. Or a run on an old swing."],
+    ],
+    rules: [
+      "Bullish: the swing low must form at a discount array, or after it runs an old swing low.",
+      "Bearish: the swing high must form at a premium array, or after it runs an old swing high.",
+      "A draw on liquidity must still be present.",
+      "Trade day 4. Use day 5 if the draw is still not taken.",
+      "On day 4, use Power of 3. Bullish: buy below the midnight open. Bearish: sell above it.",
+    ],
+    steps: [
+      "On the daily chart, find a three-candle swing at a key level.",
+      "Number the candles 1, 2, 3.",
+      "On day 4, draw the midnight open on the 15m chart.",
+      "Wait for the manipulation side (below the open for buys).",
+      "Enter on an order block or FVG. Target the PDH (bullish) or the PDL (bearish).",
+    ],
+    mistakes: ["Do not trade a swing that forms in the middle of nowhere. It must be at a key level."],
+    check: ["Which day do you trade after a three-day swing low forms?"],
+  },
+  {
+    id: "erlirl", m: "m1", title: "Internal & external range liquidity", src: "6. Internal & External Range Liquidity (18:38)", video: "v3",
+    diagram: "erl_irl",
+    summary: "Price does only two things. It runs old highs and lows (external). It rebalances fair value gaps (internal). It alternates between them.",
+    what: [
+      ["External range liquidity (ERL)", "Old highs and old lows. Stops rest there."],
+      ["Internal range liquidity (IRL)", "Fair value gaps (imbalances) inside the dealing range."],
+      ["The cycle", "ERL taken → draw to IRL. IRL tagged → draw to ERL. Repeat."],
+    ],
+    rules: [
+      "When an old high or low is taken, look for the next FVG as the draw.",
+      "When an FVG is tagged and respected, look for the next old high or low as the draw.",
+      "If there are two FVGs, choose the one on the correct side of equilibrium (discount for buys).",
+      "ERL → IRL trades are more forgiving. You can be wrong on bias and still reach the FVG.",
+      "IRL → ERL trades need a stronger bias.",
+      "Use: monthly levels with daily structure, weekly with 4H, daily with 1H.",
+    ],
+    steps: [
+      "On the higher timeframe, find the last old high or low that price took.",
+      "Draw the dealing range from that swing to the opposite swing.",
+      "Mark the 50% line (equilibrium).",
+      "Mark the FVGs inside the range.",
+      "Choose the next draw with the ERL ↔ IRL rule.",
+      "Drop to the structure timeframe. Wait for a break of structure toward the draw.",
+    ],
+    mistakes: ["Do not expect price to run the next high before it rebalances an open FVG on the correct side."],
+    check: ["Price just took a monthly old high. What is the next draw?"],
+  },
+  {
+    id: "pairing", m: "m1", title: "Order pairing", src: "7. Order Pairing (21:52)", video: "v5",
+    diagram: "order_pair",
+    summary: "Smart money needs the other side for its orders. It buys from sell stops below old lows. It sells to buy stops above old highs.",
+    what: [
+      ["Order pairing", "A large buy order is filled by sell stops. A large sell order is filled by buy stops."],
+      ["Engineered liquidity", "Retracements and failure swings that build new stops for the next pairing."],
+      ["Where smart money acts", "Monthly, weekly and daily timeframes only. Their orders are too large for lower timeframes."],
+    ],
+    rules: [
+      "Bullish: smart money accumulates below old lows.",
+      "Bearish: smart money accumulates above old highs.",
+      "A retracement inside a move often engineers liquidity. It is an entry, not a reversal.",
+      "Trust the delivery to the target while the bodies respect the FVG.",
+      "Higher-timeframe IRL → ERL is lower-timeframe order pairing (a turtle soup).",
+    ],
+    steps: [
+      "Mark the old lows (bullish) or old highs (bearish) at the key level.",
+      "Wait for price to run them.",
+      "Wait for displacement and a break of structure.",
+      "Enter on the FVG or order block that forms.",
+      "Target the engineered liquidity on the other side.",
+    ],
+    mistakes: ["Do not close a trade on a retracement when the draw is still open and bodies respect the FVG. The wicks do the damage; the bodies tell the story."],
+    check: ["Who fills a smart-money buy order?"],
+  },
+  {
+    id: "ob", m: "m1", title: "Order blocks: what makes them high probability", src: "8. Orderblocks (19:43)", video: "v5",
+    diagram: "orderblock",
+    summary: "An order block is high probability when it forms at a key level, runs liquidity, and then breaks structure.",
+    what: [
+      ["Bullish order block", "The down-close candle(s) before an up move. It pushed price into sell stops."],
+      ["Bearish order block", "The up-close candle(s) before a down move. It pushed price into buy stops."],
+      ["Mean threshold", "The 50% level of the order block."],
+      ["Breaker", "An order block that ran liquidity and then structure broke the other way."],
+      ["Inducement OB", "A short-term low (or high) forms near the middle of the range before the OB. Price runs it into the OB."],
+    ],
+    rules: [
+      "The order block must form at a key level.",
+      "It must run liquidity before structure breaks.",
+      "OB + FVG together (layered PD array) is stronger.",
+      "In a buy program, down-close candles support price. In a sell program, up-close candles resist price.",
+      "Time matters more than price. Use the London, New York or London-close killzones.",
+      "After the draw is taken, a down-close candle is no longer a valid OB.",
+      "Alignment: monthly → daily OB, weekly → 4H OB, daily → 1H OB, 4H → 15m OB, 1H → 5m OB.",
+    ],
+    steps: [
+      "Confirm the higher-timeframe key level.",
+      "Find the candle that ran the short-term liquidity.",
+      "Confirm the break of structure after it.",
+      "Mark the OB body and the mean threshold.",
+      "Enter on the return to the OB inside a killzone. Put the stop beyond the OB.",
+    ],
+    mistakes: ["Do not mark every down-close candle. Only the ones that ran stops and then broke structure."],
+    check: ["Name the three things that make an order block high probability."],
+  },
+  {
+    id: "cycles", m: "m1", title: "IPDA market cycles", src: "9. IPDA – Market Cycles (14:44)", video: "v6",
+    diagram: "cycles",
+    summary: "Price has four states: consolidation, expansion, retracement, reversal. Know what cannot come next.",
+    what: [
+      ["IPDA", "Interbank Price Delivery Algorithm."],
+      ["Allowed", "Consolidation → expansion. Expansion → retracement, reversal or consolidation."],
+      ["Not allowed", "Consolidation → reversal. Consolidation → retracement."],
+      ["AMD", "Accumulation, manipulation, distribution. The fake move out of a consolidation is the manipulation."],
+    ],
+    rules: [
+      "Price always goes from consolidation to expansion.",
+      "If price seems to reverse out of a consolidation, it is a trap. Expect an AMD pattern.",
+      "In bullish order flow with the draw not yet hit, a drop out of consolidation is manipulation.",
+      "The manipulation leg often leaves a breaker. Breaker + FVG is a strong entry.",
+    ],
+    steps: [
+      "Name the current cycle on your chart.",
+      "List what can come next.",
+      "If price breaks the wrong way out of a consolidation, wait for the stop run to finish.",
+      "Enter on the breaker or FVG in the true direction.",
+    ],
+    mistakes: ["Do not take a reversal trade directly out of a consolidation."],
+    check: ["What two moves can follow an expansion besides consolidation?"],
+  },
+  {
+    id: "bpr", m: "m1", title: "Breakaway gaps & BPRs", src: "10. Breakaway Gaps & BPRs (12:58)", video: "v7",
+    diagram: "bpr",
+    summary: "A balanced price range (BPR) next to an FVG lets the FVG stay open. That FVG is a breakaway gap.",
+    what: [
+      ["Bullish BPR", "Price delivers buy side, then sell side, then buy side again: up, down, up."],
+      ["Bearish BPR", "Price delivers sell side, then buy side, then sell side again: down, up, down."],
+      ["RDRB", "Re-delivered rebalanced PD array. Draw it from the close of the middle candle to the wick of the last candle."],
+      ["Breakaway gap", "An FVG that price does not return to, because a BPR before it already balanced price."],
+    ],
+    rules: [
+      "If a BPR sits between price and an FVG, expect the retracement to stop at the BPR.",
+      "Use the BPR as an entry PD array. It does not need an FVG next to it.",
+      "Do not leave a limit order in an FVG that sits behind a BPR. It may not fill.",
+    ],
+    steps: [
+      "Find three candles: up, down, up (bullish) or down, up, down (bearish).",
+      "Draw the RDRB zone.",
+      "Check if an FVG sits beyond it. Label that FVG as a possible breakaway gap.",
+      "Set the entry at the BPR, not at the FVG.",
+    ],
+    mistakes: ["Do not wait for an FVG fill when a BPR has already balanced the move."],
+    check: ["Why does a breakaway gap stay open?"],
+  },
+  {
+    id: "dxy", m: "m1", title: "DXY consolidation, exotic pairs & relative strength", src: "11. DXY Consolidations (12:20)", video: "v7",
+    diagram: "dxy_inside",
+    summary: "When the dollar index consolidates, money moves into the crosses. Pair a strong currency with a weak one.",
+    what: [
+      ["When DXY consolidates", "At equilibrium of a HTF range. Before NFP, CPI or FOMC. High-impact news late in the week. In London after a very large Asia. In New York after a very large London."],
+      ["Inside range", "Day 2 stays inside day 1. Day 1 high and low become the inside range high and low."],
+      ["Extended consolidation", "Day 3 fails to break the inside range. Expect the range to hold."],
+      ["Exotic pair protocol", "Strong vs weak. Strong vs consolidating. Weak vs consolidating."],
+    ],
+    rules: [
+      "If DXY consolidates on the daily, use the daily draw of each currency future.",
+      "If DXY consolidates on the 1H, use the 1H draw of each currency future.",
+      "Pair a bullish currency with a bearish or consolidating one. Pair a bearish currency with a bullish or consolidating one.",
+      "Check correlated crosses (EURGBP, AUDNZD) to pick the strongest pair.",
+      "When DXY consolidates, EURGBP is also a good choice.",
+    ],
+    steps: [
+      "On DXY daily, mark the inside range high and low.",
+      "Watch day 3. If it fails to break, expect consolidation for Thursday and Friday.",
+      "Check each currency future (6E, 6B, 6C, 6A, 6J…): bullish, bearish or consolidating.",
+      "Build the cross from the protocol.",
+      "Trade the cross with the normal model (midnight open, OB, FVG, draw).",
+    ],
+    mistakes: ["Do not trade majors against the dollar while DXY is in an extended consolidation."],
+    check: ["CAD is bearish and EUR is consolidating. Which pair and which direction?"],
+  },
+  {
+    id: "explosive", m: "m1", title: "Bonus: explosive moves (COT & range contraction)", src: "ICT – How to Find Explosive Price Moves (15:24)", video: "v6",
+    diagram: "contraction",
+    summary: "Small candle bodies come before large ranges. Commercial positioning warns of long-term turns.",
+    what: [
+      ["COT commercials", "The net commercial line from the CFTC Commitment of Traders report. Watch 12-month extremes."],
+      ["Range contraction", "Candle bodies get smaller. Ignore the wicks."],
+      ["Range expansion", "A large-body candle or a series of them. It follows contraction."],
+    ],
+    rules: [
+      "Large ranges come after small ranges.",
+      "On the daily chart, compare the last 5 to 7 bodies.",
+      "When bodies contract, prepare a Power of 3 trade for the expansion.",
+      "Use COT commercial extremes only as long-term context.",
+    ],
+    steps: [
+      "Look at the last 5–7 daily (or weekly) bodies.",
+      "If the latest body is small compared to them, expect expansion.",
+      "Use your draw on liquidity for the direction.",
+      "Plan the Power of 3 entry for the next day.",
+    ],
+    mistakes: ["Do not chase price after the expansion starts. Be in before it."],
+    check: ["What part of the candle do you read for contraction?"],
+  },
+
+  /* ---------------- M2 ---------------- */
+  {
+    id: "mmxm", m: "m2", title: "Timeframe alignment: identify market maker models", src: "1. Timeframe Alignment for MMXMs (15:00)", video: "v8",
+    diagram: "mmxm",
+    summary: "A market maker model forms on the timeframe that matches its PD array. Find the PD array first, then look one step lower for the model.",
+    what: [
+      ["Alignment table", "Monthly PD array → daily MMXM. Weekly → 4H. Daily → 1H. 4H → 15m. 1H → 5m. 15m → 1m."],
+      ["Original consolidation", "Every model starts here. The far side of it is the final target."],
+      ["Sell side of the curve (buy model)", "Price falls in stages. There are almost always at least two accumulation phases."],
+      ["Lowest low / highest high", "Defines the curve: the lowest low in a buy model, the highest high in a sell model."],
+      ["Smart money reversal (SMR)", "The turn at the key level (HTF PD array). Not before."],
+      ["Buy side of the curve", "After the SMR and a break of structure. Bullish arrays hold. Bearish arrays fail."],
+    ],
+    rules: [
+      "Use the alignment table. Do not look for a 1m model off a monthly PD array.",
+      "No key level, no smart money reversal. Wait for the HTF PD array.",
+      "Expect at least two accumulation phases on the first side of the curve.",
+      "Confirm the curve with a break of structure after the key level is hit.",
+      "On the new side, look for high-resistance runs (a raid and immediate rejection). They confirm the side of the curve.",
+      "Lowest practical model: 1m off a 15m PD array. Use volatile pairs (e.g. GBPJPY) at that size.",
+      "Most traders do best with a 1H PD array and a 5m model (intraday).",
+    ],
+    steps: [
+      "Mark the HTF PD array (e.g. daily FVG after ERL is taken).",
+      "Drop to the aligned timeframe (daily → 1H).",
+      "Find and box the original consolidation.",
+      "Number the accumulation phases as price moves toward the PD array.",
+      "Wait for price to hit the PD array and run liquidity (order pairing).",
+      "Wait for the break of structure. Label the new side of the curve.",
+      "Target: the original consolidation.",
+    ],
+    mistakes: ["Do not call a smart money reversal in the middle of a range. It needs a key level."],
+    check: ["Which timeframe do you use for the model if the PD array is on the 4H?"],
+  },
+  {
+    id: "mitig", m: "m2", title: "Mitigation blocks", src: "2. Mitigation Blocks – Mitigation of Orders (6:10)", video: "v11",
+    diagram: "mitigation",
+    summary: "Where smart money bought on one side of the curve, it sells on the other side. Extend old order blocks across. Trade new PD arrays that form inside them.",
+    what: [
+      ["Mitigation block (sell model)", "A bullish order block from the buy side of the curve, extended right into the sell side of the curve."],
+      ["Mitigation block (buy model)", "A bearish order block from the sell side of the curve, extended right into the buy side of the curve."],
+      ["Why it works", "Smart money uses the old area of buying to offload (mitigate) its position and to sell."],
+    ],
+    rules: [
+      "Extend every order block from the first side of the curve to the right.",
+      "Trade only when a new PD array (FVG, OB, BPR, volume imbalance) forms inside the old block.",
+      "Old block + new array = layered PD array. It is high probability.",
+      "Use each mitigation block to add (pyramid) while the draw is still open.",
+    ],
+    steps: [
+      "Confirm the market maker model and the new side of the curve.",
+      "Mark the order blocks on the first side of the curve.",
+      "Extend them right across the chart.",
+      "Wait for price to return to a block.",
+      "Look for a fresh PD array inside it.",
+      "Enter on that array. Stop beyond the block. Target the original consolidation.",
+    ],
+    mistakes: ["Do not sell an old bullish OB on its own. You need the new bearish array inside it."],
+    check: ["In a market maker buy model, which order blocks become mitigation blocks?"],
+  },
+  {
+    id: "mmtrade", m: "m2", title: "How to trade market maker models", src: "3. How to Trade MMXMs (19:58)", video: "v8",
+    diagram: "mmxm", diagram2: "mitigation",
+    summary: "Use the HTF draw, wait for the aligned stop hunt, then drop one more timeframe for a precise model and entry inside a killzone.",
+    what: [
+      ["Fractal entry", "A 1H model often has a 5m model inside its turn. A 15m retracement can be a 1m buy model."],
+      ["Sell program", "After the stop hunt at the premium array and a BOS: up-close candles resist price. Bearish arrays hold."],
+      ["Entry arrays", "OB, FVG, BPR/RDRB, breaker, mitigation block. Layered is better."],
+    ],
+    rules: [
+      "Start with the HTF draw (ERL ↔ IRL).",
+      "Wait for the aligned-timeframe stop hunt at the PD array (e.g. 1H stop hunt into a daily premium array).",
+      "Drop one more timeframe (e.g. 5m) to find the precise model.",
+      "Match the entry with a killzone: London 02:00–05:00, New York, or London close. Indices: AM and PM sessions.",
+      "Bullish: the entry should form below the midnight open.",
+      "Trade again on later days while the original consolidation is not taken.",
+      "On the 1m, the SMR still needs a HTF (15m) PD array.",
+    ],
+    steps: [
+      "HTF: write the draw and mark the PD array.",
+      "Aligned TF: box the original consolidation and the accumulation phases.",
+      "Wait for the stop hunt at the PD array and the BOS.",
+      "Mark mitigation blocks and BPRs. Note breakaway gaps.",
+      "Lower TF (5m or 1m): find the small model inside the turn.",
+      "Inside the killzone, enter on the first layered PD array.",
+      "Stop: beyond the breaker or the SMR. Target: the original consolidation.",
+    ],
+    mistakes: ["Do not enter before the killzone even if the SMR forms just before it. Wait for the entry inside the killzone."],
+    check: ["After a daily stop hunt, which timeframe shows the market maker model?"],
+  },
+  {
+    id: "silver", m: "m2", title: "The Silver Bullet as an entry model", src: "4. The Silver Bullet as an Entry Model (21:17)", video: "v11",
+    diagram: "silver",
+    summary: "The Silver Bullet is the second stage of accumulation (buy model) or distribution (sell model). You find it with intermediate-term highs and lows.",
+    what: [
+      ["Short-term low (STL)", "A swing low."],
+      ["Long-term low (LTL)", "The extreme low of the range, with a STL on each side. Usually the SMR."],
+      ["Intermediate-term low (ITL)", "A low with a STL to the left and a STL to the right. This is the protected low. Put the stop below it."],
+      ["Low-risk buy / sell", "The first stage. Smart money's entry. Higher risk for you because structure is not yet confirmed."],
+      ["Silver Bullet", "The second stage. The next STL that forms to the right of the ITL (or the next STH right of the ITH)."],
+    ],
+    rules: [
+      "Use it only after a SMR at a key level, with timeframe alignment.",
+      "Option 1: anticipate the ITL. Enter on the STL forming to its right.",
+      "Option 2: wait for the ITL to be confirmed (STL on both sides). Then enter on the next leg.",
+      "Look for a mitigation block or breaker where the STL should form. A fresh PD array inside it is the entry.",
+      "Stop below the ITL (buy) or above the ITH (sell).",
+      "The silver bullet often forms inside the OTE levels of the range.",
+    ],
+    steps: [
+      "Confirm the SMR at the HTF PD array and the BOS.",
+      "Label each low: STL, LTL.",
+      "Mark the low-risk buy (first pullback). Do not chase it.",
+      "Wait for a STL to be raided and a new low to hold. Mark it as the possible ITL.",
+      "Mark mitigation blocks and breakers above it.",
+      "Enter on the fresh FVG, OB or BPR where the next STL should form.",
+      "Stop below the ITL. Target: the original consolidation.",
+    ],
+    mistakes: ["Do not take the low-risk buy as your model entry. The silver bullet is the second stage."],
+    check: ["Where do you place the stop on a Silver Bullet buy?"],
+  },
+
+  /* ---------------- M3 ---------------- */
+  {
+    id: "ltp", m: "m3", title: "Long-term perspective (LTP): WHY", src: "1. Long Term Perspective (17:48)", video: "v1",
+    diagram: "erl_irl",
+    summary: "The LTP tells you why price must go to a level. Price moves from one HTF premium or discount level to another.",
+    what: [
+      ["Timeframes", "Monthly, weekly, daily (swing). Can be lower for intraday and scalping profiles."],
+      ["Inputs", "Dealing range, HTF PD arrays, ERL and IRL, daily SMT, stop hunts, seasonal tendency (optional)."],
+      ["Seasonal tendency", "A 15- and 30-year average path for each month. A 'treasure map'. It works only with a HTF PD array."],
+      ["SMT divergence", "One correlated market makes a new high or low. The other does not. Example: DXY takes lows while EURUSD fails to take highs."],
+    ],
+    rules: [
+      "Without the higher timeframe, you are gambling.",
+      "Time (seasonal) plus price (HTF PD array) together give fast, one-sided moves.",
+      "A seasonal tendency alone is not a trade.",
+      "If the monthly and weekly are not clear, use daily ERL ↔ IRL to find the draw.",
+      "Order flow is on your side when bearish PD arrays fail and bullish ones hold (for longs).",
+    ],
+    steps: [
+      "Open the monthly chart. Draw the dealing range.",
+      "Mark premium, discount and equilibrium.",
+      "Mark HTF PD arrays: FVG, OB, breaker, mitigation block, old highs and lows.",
+      "Apply ERL ↔ IRL. Write the draw on liquidity.",
+      "Check the seasonal chart for the month. Note if it agrees.",
+      "Check DXY and SMT.",
+      "Repeat on weekly. Then on daily if needed.",
+    ],
+    mistakes: ["Do not buy in January only because the seasonal is bullish. Wait for price to hit the HTF PD array."],
+    check: ["What question does the LTP answer?"],
+  },
+  {
+    id: "itp", m: "m3", title: "Intermediate-term perspective (ITP): HOW", src: "2. Intermediate Term Perspective (12:09)", video: "v1",
+    diagram: "orderblock",
+    summary: "The ITP tells you how price gets to the LTP draw. Wait for its structure to break in the direction of the draw.",
+    what: [
+      ["Timeframes", "4H and 1H (swing: daily)."],
+      ["Alignment", "LTP draw and ITP order flow point the same way."],
+      ["Weekly profile", "Which day makes the high or low of the week. Use the economic calendar."],
+    ],
+    rules: [
+      "Start with the LTP draw. Then wait for an ITP break of structure toward it.",
+      "Draw the weekly opening price. Bullish: expect the low of the week below it.",
+      "A day without news usually consolidates.",
+      "A day with high-impact (red folder) news injects volatility. It often makes the high or low of the week.",
+      "After ERL is taken, a counter-trend draw to IRL is valid. The ITP must agree first.",
+    ],
+    steps: [
+      "Write the LTP draw.",
+      "Open the 4H. Find the last liquidity run against the draw.",
+      "Wait for the market structure shift toward the draw.",
+      "Draw the weekly open.",
+      "Open the economic calendar. Mark each red-folder event by day and time.",
+      "Choose the most likely day for the high or low of the week.",
+    ],
+    mistakes: ["Do not trade the LTP draw while the ITP still points the other way."],
+    check: ["Monday has no news and Tuesday has CPI. Which day more likely makes the low of the week (bullish)?"],
+  },
+  {
+    id: "stp", m: "m3", title: "Short-term perspective (STP): New York bread & butter", src: "3. Short Term Perspective (44:23)", video: "v9",
+    diagram: "ny_bb", diagram2: "judas",
+    summary: "Between 08:00 and 12:00 New York, price only continues or reverses. You need a stop hunt or a PD array retracement.",
+    what: [
+      ["Killzone", "08:00–12:00 New York."],
+      ["Reversal sweet spot", "09:00–10:30 New York."],
+      ["Continuation sweet spot", "10:00–11:30 New York. Use it when London was very large, or news is at 10:00."],
+      ["Targets", "Previous day high/low, Asia high/low, London high/low."],
+      ["News scenarios", "Continuation · Judas then continuation · Judas reversal."],
+    ],
+    rules: [
+      "Before the session, decide: continuation or reversal.",
+      "Continuation: London went below (bullish) or above (bearish) the midnight open to accumulate.",
+      "At 08:00, draw a vertical line. Look left for failure swings and equal highs or lows.",
+      "Frame the trade only on a premium/discount retracement or a stop hunt.",
+      "Avoid New York when London was very large, when news is late (FOMC 14:00), or on the day before NFP or CPI.",
+      "News: if the stops on the wrong side were already taken, expect one-sided news. If not, expect a Judas swing first.",
+      "Do not look for setups before 08:00 or after 12:00.",
+    ],
+    steps: [
+      "Draw the 00:00 vertical line and the midnight open.",
+      "Mark Asia and London highs and lows.",
+      "Mark the 08:00 line and the 12:00 line.",
+      "Check the calendar. Note 08:30 and 10:00 events.",
+      "Ask: continuation or reversal?",
+      "Wait for the stop hunt (15m/1H) or the PD array retracement.",
+      "Drop to 1m–5m. Wait for the market structure shift.",
+      "Enter on the first OB, FVG or BPR in discount (buy) or premium (sell).",
+      "Stop: beyond the stop-hunt swing (the protected intermediate-term high or low).",
+      "Target: the session high/low or the PDH/PDL. Take a partial at the first one.",
+    ],
+    mistakes: ["Do not trade CPI releases directly. Slippage can be severe."],
+    check: ["What are the only two ways to frame a trade between 08:00 and 12:00?"],
+  },
+  {
+    id: "together", m: "m3", title: "Putting it all together", src: "4. Putting it All Together (14:20)", video: "v9",
+    diagram: "ny_bb",
+    summary: "The best trade has LTP, ITP and STP all pointing the same way, inside the time window.",
+    what: [
+      ["Example 1 (oil)", "Daily: sell stops taken → draw to daily premium FVG. 1H: structure breaks up. 5m: 08:00–12:00 reversal at 09:00–10:30. Target London highs."],
+      ["Example 2 (USDCAD)", "Weekly: premium FVG hit → draw to ERL lows. 4H: market maker sell model, high-probability OB. 15m: NFP stop hunt into the mitigation block. 5m: entry."],
+    ],
+    rules: [
+      "All three perspectives must agree.",
+      "Keep entries inside the time window. Entries outside it make your data inconsistent.",
+      "The only question for the session: continuation or reversal?",
+    ],
+    steps: [
+      "LTP: write the draw and the PD array.",
+      "ITP: confirm the structure shift.",
+      "STP: wait for 08:00–12:00. Wait for the stop hunt or PD array.",
+      "Enter. Add on fresh PD arrays in mitigation blocks if the draw is still open.",
+    ],
+    mistakes: ["Do not take a lower-timeframe setup that fights the LTP and ITP."],
+    check: ["What is the one question you answer for the New York session?"],
+  },
+
+  /* ---------------- M4 ---------------- */
+  {
+    id: "universal", m: "m4", title: "Universal model", src: "1. Universal Model (44:34)", video: "v8",
+    diagram: "mmxm",
+    summary: "One model for all profiles, killzones and markets. Only the timeframes change.",
+    what: [
+      ["LTP / ITP / STP", "Draw + HTF PD array / structure + continuation purge / market maker model + entry."],
+      ["Swing trader", "LTP monthly (or weekly) · ITP daily · STP 1H. Holds for days."],
+      ["Intraday trader", "LTP weekly or daily · ITP 1H · STP 5m. Holds 3–5 hours."],
+      ["Scalper", "LTP 4H (or daily) · ITP 15m · STP 1m. Holds minutes to a session."],
+      ["Continuation purge", "On the ITP, price takes a swing low (bullish) or high (bearish) in the direction of the draw. That activates the program."],
+    ],
+    rules: [
+      "Choose the profile that fits your personality. Then do not change timeframes during a trade.",
+      "ERL → IRL is more forgiving than IRL → ERL.",
+      "Buy program: after the purge and BOS, down-close candles support price. Bullish PD arrays hold.",
+      "Enter in discount (buys) or premium (sells) of the STP dealing range.",
+      "Use mitigation blocks from the other side of the curve. Fresh PD arrays inside them are high probability.",
+      "Trade only inside a killzone: London 02:00–05:00, New York 08:00–12:00, Asia 20:00–22:00 (NY time).",
+      "Relative strength (optional): check AUDNZD, EURGBP to pick the stronger pair.",
+    ],
+    steps: [
+      "Pick your profile.",
+      "LTP: find the draw with ERL ↔ IRL.",
+      "ITP: wait for the BOS and the continuation purge.",
+      "STP: inside the killzone, find the market maker model.",
+      "Wait for the purge and BOS on the STP.",
+      "Draw the dealing range. Mark the PD arrays in the correct half.",
+      "Enter. Stop beyond the purge. Target the LTP draw (swing) or the next liquidity (intraday/scalp).",
+      "Add on new PD arrays inside mitigation blocks while the draw is open.",
+    ],
+    mistakes: ["Do not frame trades on candles before the purge. Wait until price leaves the area."],
+    check: ["Which timeframes does an intraday trader use?"],
+  },
+  {
+    id: "asia", m: "m4", title: "Asian session model (AUDJPY)", src: "2. Asian Session Model (8:39)", video: "v8",
+    diagram: "asia",
+    summary: "Australia and Japan open one hour apart. Between 20:00 and 22:00 New York, a 15m stop hunt starts the move.",
+    what: [
+      ["Pair", "AUDJPY."],
+      ["Killzone", "20:00–22:00 New York time."],
+      ["Trigger", "A 15m swing low runs (bullish turtle soup) or a 15m swing high runs (bearish)."],
+      ["Entry timeframe", "2m to 5m. Not 1m: it is inconsistent."],
+    ],
+    rules: [
+      "Find the daily draw first (ERL ↔ IRL).",
+      "Wait for the 15m stop hunt inside 20:00–22:00.",
+      "Wait for the BOS on 2–5m.",
+      "Enter on an FVG or OB in discount (buy) or premium (sell).",
+      "OB + FVG together is very strong.",
+    ],
+    steps: [
+      "Daily: write the draw.",
+      "15m: mark swing highs and lows before 20:00.",
+      "Wait for one to be run in the killzone, against the draw.",
+      "2–5m: wait for the BOS. Draw the dealing range.",
+      "Enter on the PD array. Target failure swings toward the draw.",
+    ],
+    mistakes: ["Do not take the setup if the stop hunt happens outside 20:00–22:00."],
+    check: ["Why is 20:00–22:00 New York volatile for AUDJPY?"],
+  },
+  {
+    id: "risk", m: "m4", title: "Risk management for funded accounts", src: "3. Risk Management for Funded Accounts (4:35)", video: "v10",
+    summary: "Pass each phase with two winning trades. Build a buffer first. Never risk more when you are in drawdown.",
+    what: [
+      ["Typical rules", "Phase 1: 8% target. Phase 2: 5% target. Max drawdown 10–12%. Daily drawdown about 5%."],
+      ["Objective", "Win two trades in a row."],
+    ],
+    rules: [
+      "At break-even, risk 1%.",
+      "Below break-even, risk 1% or less. Never more.",
+      "Phase 1 option A: 1% at 1:2 (+2%), then 2% at 1:3 (+6%) = 8%.",
+      "Phase 1 option B: 1% at 1:3 (+3%), then 2% at 1:2.5 (+5%) = 8%.",
+      "Phase 2 option A: 1% at 1:2 (+2%), then 1% at 1:3 (+3%) = 5%.",
+      "Phase 2 option B: 1% at 1:3 (+3%), then 1% at 1:2 (+2%) = 5%.",
+      "Live account: 0.5% at 1:2 (+1% buffer). Then 1% at 1:2 or 1:3.",
+      "At +2% to +6% on a live account, stop. Take the payout. Move to the next account.",
+    ],
+    steps: [
+      "Enter your account phase and balance in the risk calculator (Playbook tab).",
+      "Read the risk % for the next trade.",
+      "Size the position from the stop distance.",
+      "Log the result in the Journal.",
+    ],
+    mistakes: ["Do not increase risk to win back a loss."],
+    check: ["You are at −1% in phase 1. How much do you risk on the next trade?"],
+  },
+];
+
+/* Step-by-step trading procedure. `when` = timing, `do` = instructions, `out` = what you write down */
+const PLAYBOOK = [
+  { id: "p0", phase: "Once", title: "Choose your profile",
+    do: ["Choose: swing, intraday or scalper.", "Write your three timeframes (LTP / ITP / STP).", "Choose your killzone(s)."],
+    out: "Profile, timeframes, killzones", lesson: "universal" },
+  { id: "p1", phase: "Sunday", title: "LTP: find the draw on liquidity",
+    do: ["Open monthly, then weekly, then daily.", "Draw the dealing range. Mark the 50% line.", "Mark HTF PD arrays and old highs and lows.", "Apply ERL ↔ IRL. Write the draw.", "Optional: check the seasonal tendency and COT."],
+    out: "Draw on liquidity + HTF PD array", lesson: "ltp" },
+  { id: "p2", phase: "Sunday", title: "Check the dollar",
+    do: ["Mark the DXY draw.", "Look for SMT between DXY and your pair.", "If DXY consolidates, use the exotic pair protocol."],
+    out: "DXY bias, SMT yes/no", lesson: "dxy" },
+  { id: "p3", phase: "Sunday", title: "Plan the week with the calendar",
+    do: ["Draw the weekly opening price.", "Mark each red-folder event by day and time.", "Choose the likely day for the high or low of the week."],
+    out: "Expected weekly profile", lesson: "itp" },
+  { id: "p4", phase: "Each day, before London", title: "ITP: confirm structure",
+    do: ["Open the 4H or 1H.", "Check: did structure break toward the draw?", "Check for a continuation purge.", "Check the daily swing pattern (day 4?) and range contraction."],
+    out: "ITP aligned: yes / no", lesson: "itp" },
+  { id: "p5", phase: "Each day, before the killzone", title: "Mark the 15m chart",
+    do: ["Draw the 00:00 NY vertical line and the midnight open.", "Mark the PDH and PDL.", "Mark the Asia high and low.", "Mark the London high and low (for New York).", "Mark failure swings and equal highs/lows toward the draw.", "Mark today's red-folder times."],
+    out: "15m chart (Journal step 2)", lesson: "po3" },
+  { id: "p6", phase: "Each day, before the killzone", title: "Decide: trade or no trade",
+    do: ["No trade if LTP and ITP disagree.", "No trade if London was very large (for New York).", "No trade if high-impact news is later than the session, or tomorrow is NFP/CPI.", "Decide: continuation or reversal?", "Decide the news scenario: continuation, Judas then continuation, or Judas reversal."],
+    out: "Go / no-go, scenario", lesson: "stp" },
+  { id: "p7", phase: "In the killzone", title: "Wait for the trigger",
+    do: ["Wait for a stop hunt (15m/1H) or a HTF PD array retracement.", "Bullish: it must happen below the midnight open. Bearish: above it.", "Reversal days: 09:00–10:30. Continuation with 10:00 news: 10:00–11:30."],
+    out: "Trigger time + type", lesson: "stp" },
+  { id: "p8", phase: "In the killzone", title: "Confirm and enter",
+    do: ["Drop to 1m–5m.", "Wait for the market structure shift with displacement.", "Draw the dealing range. Find discount (buy) or premium (sell).", "Enter on the first OB, FVG or BPR there. Best: inside a mitigation block, or the Silver Bullet (second stage).", "Stop beyond the stop-hunt swing (the protected ITL/ITH).", "Target the first low-resistance liquidity. Final target: the draw."],
+    out: "Entry, stop, target, R", lesson: "ob" },
+  { id: "p9", phase: "In the trade", title: "Manage",
+    do: ["Take a partial at the first liquidity pool.", "Hold while bodies respect the FVG and the draw is open.", "Add only on fresh PD arrays inside mitigation blocks.", "Close at the draw, or at 12:00 NY for intraday trades."],
+    out: "Partials, exit", lesson: "pairing" },
+  { id: "p10", phase: "Every trade", title: "Size by the risk plan",
+    do: ["At break-even: 1%.", "In drawdown: 1% or less.", "With a buffer: up to 2% (phase 1 only)."],
+    out: "Risk %", lesson: "risk" },
+  { id: "p11", phase: "After the session", title: "Journal it",
+    do: ["Open the Journal tab. Press New entry.", "Step 1: HTF chart(s). Step 2: 15m chart. Step 3: execution chart.", "Fill each field. The form tells you what to input and where to find it.", "Log no-trade days and backtests too."],
+    out: "Journal entry", lesson: "intro" },
+];
+
+const GLOSSARY = [
+  ["AMD", "Accumulation, manipulation, distribution."],
+  ["BOS", "Break of structure. Price closes beyond the last swing in the direction of the move."],
+  ["BPR", "Balanced price range. Up–down–up or down–up–down candles that balance price."],
+  ["Breaker", "An order block that ran liquidity before structure broke the other way."],
+  ["Buy / sell program", "The state after a purge and a BOS. Down-close (buy) or up-close (sell) candles support price."],
+  ["CE", "Consequent encroachment. The 50% level of a gap or wick."],
+  ["Continuation purge", "A run of a swing in the direction of the draw on the ITP timeframe."],
+  ["Dealing range", "The range from the last swing low to the last swing high that you trade inside."],
+  ["Discount", "The lower half of the dealing range. Buy here."],
+  ["Displacement", "A strong, fast move that leaves an FVG."],
+  ["DOL", "Draw on liquidity. Where price must go next."],
+  ["Equilibrium", "The 50% level of the dealing range."],
+  ["ERL", "External range liquidity. Old highs and old lows."],
+  ["FVG", "Fair value gap. A three-candle gap between the wick of candle 1 and the wick of candle 3."],
+  ["HRL", "High-resistance liquidity. A level that ran and rejected."],
+  ["HTF", "Higher timeframe."],
+  ["IPDA", "Interbank Price Delivery Algorithm."],
+  ["IRL", "Internal range liquidity. Fair value gaps."],
+  ["Judas swing", "A fake move at the open or at news that runs stops before the real move."],
+  ["Killzone", "A time window with high probability. London 02:00–05:00, NY 08:00–12:00, Asia 20:00–22:00 (NY time)."],
+  ["LRL", "Low-resistance liquidity. Failure swings, equal highs/lows, trend lines."],
+  ["Mean threshold", "The 50% level of an order block."],
+  ["Midnight open", "The price at 00:00 New York. The true day open."],
+  ["Mitigation block", "An old order block from the other side of the curve, extended right."],
+  ["MMXM", "Market maker model (buy or sell)."],
+  ["MSS", "Market structure shift. The first BOS against the old order flow."],
+  ["Order block (OB)", "The last opposite-close candle(s) before displacement."],
+  ["Order pairing", "Matching large orders with resting stops."],
+  ["PD array", "Premium / discount array. Any level price reacts to: FVG, OB, breaker, BPR, old high/low."],
+  ["PDH / PDL", "Previous day high / low."],
+  ["Premium", "The upper half of the dealing range. Sell here."],
+  ["Red folder", "High-impact news on the economic calendar."],
+  ["RDRB", "Re-delivered rebalanced PD array. Another name for a BPR used as an entry."],
+  ["SMR", "Smart money reversal."],
+  ["SMT", "Smart money technique. A divergence between correlated markets."],
+  ["Turtle soup", "A run of an old high or low that reverses."],
+];
+
+/* Journal framework: from "How to journal as an ICT trader" (3 steps) + this course.
+   Each field: [key, label, type, input-hint, where-hint, options] */
+const JOURNAL = [
+  { step: "Setup", sub: "Basic details about this trade or no-trade day.", fields: [
+    ["date", "Date", "date", "The trading day.", "Your calendar. Use New York date for Asia trades."],
+    ["kind", "Type", "chips", "Live, demo, backtest or no-trade day.", "Backtest = a past chart you study.", ["Live", "Demo", "Backtest", "No trade"]],
+    ["pair", "Market", "text", "The symbol, e.g. EURUSD, NQ, AUDJPY.", "Your chart's symbol box.", null, "EURUSD"],
+    ["model", "Model", "chips", "The model you traded.", "Models & risk / Top-down lessons.", ["NY bread & butter – reversal", "NY bread & butter – continuation", "Universal model", "MMXM", "Silver Bullet", "Day 4 swing", "Asian session (AUDJPY)", "Exotic pair protocol"]],
+    ["killzone", "Killzone", "chips", "The time window of the entry.", "The 'Now' clock at the top of this app.", ["Asia 20–22", "London 02–05", "New York 08–12", "Outside killzone"]],
+    ["dir", "Direction", "chips", "Long or short.", "Your bias from step 1.", ["Long", "Short"]],
+  ]},
+  { step: "Step 1 · HTF chart(s)", sub: "All trades need the higher timeframe. Use more than one HTF if needed.", fields: [
+    ["htfImg", "HTF screenshot(s)", "images", "Monthly / weekly / daily / 4H / 1H charts.", "TradingView → camera icon → Download image. Then add it here."],
+    ["htfTf", "Timeframes shown", "multi", "Which HTFs are in the screenshots.", "Your screenshot labels.", ["Monthly", "Weekly", "Daily", "4H", "1H"]],
+    ["poi", "Point of interest", "text", "The HTF PD array you trade from. Type + timeframe.", "LTP step: dealing range + PD arrays.", null, "Daily bullish FVG (1.0710–1.0735)"],
+    ["dol", "Draw on liquidity", "text", "Where price must go. Level + why.", "ERL ↔ IRL rule on the HTF.", null, "Weekly buy stops above 1.0890 (ERL)"],
+    ["range", "ERL ↔ IRL", "chips", "Which way the trade runs.", "ERL/IRL lesson.", ["ERL → IRL", "IRL → ERL"]],
+    ["pd", "Premium / discount", "chips", "Where price is in the HTF dealing range.", "HTF chart with the 50% line.", ["Discount", "Premium", "Equilibrium"]],
+    ["smt", "SMT", "chips", "Is there SMT divergence with DXY or a correlated pair?", "Compare DXY and your pair on the same timeframe.", ["Yes", "No"]],
+    ["itp", "ITP aligned", "chips", "Did the 4H/1H structure break toward the draw?", "ITP chart.", ["Yes", "No"]],
+  ]},
+  { step: "Step 2 · 15m chart", sub: "The 15m frames the day. If the trade does not make sense here, do not take it.", fields: [
+    ["m15Img", "15m screenshot", "images", "The 15m chart with all levels below drawn on it.", "TradingView 15m."],
+    ["mo", "Midnight opening price", "num", "The price at 00:00 New York.", "15m chart: the candle that opens at 00:00 NY (05:00 UK in winter)."],
+    ["asiaH", "Asia high", "num", "The highest price of the Asian session.", "20:00–00:00 NY on the 15m chart."],
+    ["asiaL", "Asia low", "num", "The lowest price of the Asian session.", "20:00–00:00 NY on the 15m chart."],
+    ["lonH", "London high", "num", "The highest price of London.", "02:00–05:00 NY on the 15m chart."],
+    ["lonL", "London low", "num", "The lowest price of London.", "02:00–05:00 NY on the 15m chart."],
+    ["lonAcc", "London vs midnight open", "chips", "Where London traded relative to the open.", "Compare London with the midnight open line.", ["Below open", "Above open", "Both sides", "Very large range"]],
+    ["news", "Red-folder events", "text", "Time and name of high-impact news.", "ForexFactory or your calendar → red folder, USD + your pair's currencies.", null, "08:30 CPI, 10:00 Consumer sentiment"],
+    ["scenario", "Session scenario", "chips", "Your plan for the session.", "STP lesson.", ["Continuation", "Reversal", "Judas → continuation", "Judas reversal", "No trade"]],
+    ["nyNotes", "New York session notes", "textarea", "What New York did up to your entry.", "Your 15m and 5m charts."],
+  ]},
+  { step: "Step 3 · Execution chart", sub: "Your entry timeframe with your strategy marked and the position tool shown.", fields: [
+    ["exImg", "Execution screenshot", "images", "Entry chart with the long/short position tool and HTF POIs marked.", "TradingView → Long/Short Position tool → screenshot."],
+    ["exTf", "Entry timeframe", "chips", "The chart you entered on.", "Your execution chart.", ["1m", "2m", "3m", "5m", "15m", "1H"]],
+    ["trigger", "Trigger", "chips", "What started the setup.", "Killzone step.", ["Stop hunt", "PD array retracement", "Continuation purge"]],
+    ["array", "Entry PD array", "multi", "What you entered on.", "Execution chart.", ["Order block", "FVG", "BPR / RDRB", "Breaker", "Mitigation block", "OTE"]],
+    ["entry", "Entry price", "num", "Your fill price.", "Broker trade history."],
+    ["stop", "Stop loss", "num", "Your stop price.", "Beyond the stop-hunt swing."],
+    ["target", "Target", "num", "Your final target price.", "The draw on liquidity / session high or low."],
+    ["risk", "Risk %", "num", "Percent of the account at risk.", "Playbook → risk calculator."],
+    ["result", "Result", "chips", "How the trade ended.", "Broker trade history.", ["Win", "Loss", "Break-even", "Open"]],
+    ["rr", "R result", "num", "Profit or loss in R. Loss = −1. Win at 1:3 = 3.", "Exit − entry ÷ (entry − stop)."],
+    ["pnl", "P&L", "num", "Money result in account currency.", "Broker trade history."],
+  ]},
+  { step: "Review", sub: "Grade the process, not the result.", fields: [
+    ["rules", "Rules followed", "multi", "Tick each rule you followed.", "Playbook tab.", ["LTP + ITP aligned", "Inside killzone", "Correct side of midnight open", "Entry in discount/premium", "Stop beyond the sweep", "Risk per plan"]],
+    ["grade", "Grade", "chips", "A = all rules. B = one missed. C = two or more missed.", "Count the unticked rules.", ["A", "B", "C"]],
+    ["emotion", "Emotion", "chips", "How you felt before entry.", "Be honest.", ["Calm", "Hesitant", "FOMO", "Revenge", "Bored"]],
+    ["lesson", "Lesson learned", "textarea", "One sentence. What will you do the same or differently?", "Your review of the three charts."],
+  ]},
+];
+
+const VIDEOS = [
+  { id: "v1", title: "The map: why, how, where", len: "", lessons: ["intro", "ltp", "itp"] },
+  { id: "v2", title: "Power of 3 and the midnight open", lessons: ["po3"] },
+  { id: "v3", title: "Liquidity: ERL, IRL, PDH/PDL, failure swings", lessons: ["erlirl", "pdhl", "failure"] },
+  { id: "v4", title: "The day 4 swing model", lessons: ["swing4"] },
+  { id: "v5", title: "Order pairing and order blocks", lessons: ["pairing", "ob"] },
+  { id: "v6", title: "Market cycles and explosive moves", lessons: ["cycles", "explosive"] },
+  { id: "v7", title: "BPRs, breakaway gaps and the dollar", lessons: ["bpr", "dxy"] },
+  { id: "v8", title: "Market maker models and the universal model", lessons: ["mmxm", "mmtrade", "universal", "asia"] },
+  { id: "v9", title: "New York bread & butter", lessons: ["stp", "together"] },
+  { id: "v10", title: "Risk plan and journaling", lessons: ["risk", "intro"] },
+  { id: "v11", title: "Mitigation blocks and the Silver Bullet", lessons: ["mitig", "silver"] },
+];
+
+const DIAGRAMS = {"po3_bull":{"title":"Power of 3: bullish day (Open\u2013Low\u2013High\u2013Close)","tf":"15m","c":[[49.48,51.17,48.29,50.05],[50.05,52.33,49.36,49.55],[49.55,50.43,45.62,50.04],[50.04,51.17,48.88,50.46],[50.46,52.06,48.15,49.96],[49.96,50.96,48.18,50.86],[50.86,52.22,50.31,51.36],[51.36,52.26,47.92,48.94],[48.94,50.31,46.95,48.26],[48.26,49.97,45.68,47.01],[47.01,49.27,43.96,44.93],[44.93,45.48,42.38,43.02],[43.02,44.57,41.9,42.56],[42.56,44.19,42.5,43.01],[43.01,45.69,42.2,44.32],[44.32,47.38,41.81,46.24],[46.24,49.21,46.13,47.43],[47.43,50.58,45.05,48.6],[48.6,53.21,47.8,51.49],[51.49,53.42,50.12,52.65],[52.65,56.91,51.74,54.74],[54.74,55.13,53.07,54.24],[54.24,54.8,50.6,52.58],[52.58,52.85,51.84,52.08],[52.08,56.13,49.92,54.93],[54.93,62.24,54.78,57.91],[57.91,61.21,57.15,59.77],[59.77,61.84,58.61,61.44],[61.44,64.33,61.14,64.13],[64.13,67.62,61.34,66.44],[66.44,69.43,65.52,68.48],[68.48,71.02,67.21,70.02],[70.02,74.15,68.07,72.07],[72.07,73.81,70.54,71.34],[71.34,72.39,67.21,70.35],[70.35,72.09,70.26,70.85],[70.85,73.24,70.64,71.6],[71.6,74.73,70.97,73.16],[73.16,74.94,72.15,74.46],[74.46,76.27,74.21,76.25]],"a":[["v",0,"dim","00:00 NY",0.0],["v",6,"dim","London",0.0],["v",16,"dim","New York",0.0],["h",49.48,0,39,"gold","Midnight open",true,0.05],["z",45.62,52.33,0,6,"blue","Accumulation",0.2],["t",12,38.9,"Manipulation: low of day below the open","bear",0.4,"c"],["a",18,54,34,72,"bull",0.6],["t",30,80,"Distribution: expansion up","bull",0.7,"c"]]},"po3_bear":{"title":"Power of 3: bearish day (Open\u2013High\u2013Low\u2013Close)","tf":"15m","c":[[50.52,51.71,48.83,49.95],[49.95,50.64,47.67,50.45],[50.45,54.38,49.57,49.96],[49.96,51.12,48.83,49.54],[49.54,51.85,47.94,50.04],[50.04,51.82,49.04,49.14],[49.14,49.69,47.78,48.64],[48.64,52.08,47.74,51.06],[51.06,53.05,49.69,51.74],[51.74,54.32,50.03,52.99],[52.99,56.04,50.73,55.07],[55.07,57.62,54.52,56.98],[56.98,58.1,55.43,57.44],[57.44,57.5,55.81,56.99],[56.99,57.8,54.31,55.68],[55.68,58.19,52.62,53.76],[53.76,53.87,50.79,52.57],[52.57,54.95,49.42,51.4],[51.4,52.2,46.79,48.51],[48.51,49.88,46.58,47.35],[47.35,48.26,43.09,45.26],[45.26,46.93,44.87,45.76],[45.76,49.4,45.2,47.42],[47.42,48.16,47.15,47.92],[47.92,50.08,43.87,45.07],[45.07,45.22,37.76,42.09],[42.09,42.85,38.79,40.23],[40.23,41.39,38.16,38.56],[38.56,38.86,35.67,35.870000000000005],[35.870000000000005,38.66,32.379999999999995,33.56],[33.56,34.480000000000004,30.569999999999993,31.519999999999996],[31.519999999999996,32.790000000000006,28.980000000000004,29.980000000000004],[29.980000000000004,31.930000000000007,25.849999999999994,27.930000000000007],[27.930000000000007,29.459999999999994,26.189999999999998,28.659999999999997],[28.659999999999997,32.790000000000006,27.61,29.650000000000006],[29.650000000000006,29.739999999999995,27.909999999999997,29.150000000000006],[29.150000000000006,29.36,26.760000000000005,28.400000000000006],[28.400000000000006,29.03,25.269999999999996,26.840000000000003],[26.840000000000003,27.849999999999994,25.060000000000002,25.540000000000006],[25.540000000000006,25.790000000000006,23.730000000000004,23.75]],"a":[["v",0,"dim","00:00 NY",0.0],["v",6,"dim","London",0.0],["v",16,"dim","New York",0.0],["h",50.52,0,39,"gold","Midnight open",true,0.05],["z",47.67,54.38,0,6,"blue","Accumulation",0.2],["t",12,62.1,"Manipulation: high of day above the open","bull",0.4,"c"],["a",18,46,34,28,"bear",0.6],["t",30,18,"Distribution: expansion down","bear",0.7,"c"]]},"failure":{"title":"Failure swings: low vs high resistance liquidity","tf":"1H","c":[[82.25,84.59,81.55,82.75],[82.75,84.07,79.6,79.84],[79.84,81.37,75.12,77.2],[77.2,78.08,73.36,73.54],[73.54,76.23,73.45,76.05],[76.05,78.15,73.43,77.66],[77.66,78.81,73.18,74.99],[74.99,75.45,70.48,70.9],[70.9,71.47,66.81,67.4],[67.4,72.08,67.13,69.66],[69.66,73.2,69.3,71.75],[71.75,72.55,66.14,68.88],[68.88,71.37,65.03,65.56],[65.56,66.03,61.2,61.76],[61.76,64.51,61.35,63.57],[63.57,67.93,63.54,66.12],[66.12,66.94,59.08,61.14],[61.14,61.69,55.38,56.64],[56.64,59.7,51.1,52.25],[52.25,53.43,49.93,53.43],[53.43,55.69,52.31,55.42],[55.42,55.79,50.74,50.76],[50.76,51.52,44.73,44.95],[44.95,47.54,39.08,40.31],[40.31,42.71,39.15,41.81],[41.81,45.88,40.56,44.33],[44.33,44.54,41.1,41.36],[41.36,42.28,37.94,38.53],[38.53,39.49,30.5,37],[37,39.01,32.84,38.01],[38.01,41.99,37.57,41.78],[41.78,47.09,38.01,45.58],[45.58,52.96,44.52,49.59],[49.59,54.77,49.1,54.04],[54.04,60.06,52.87,59.45],[59.45,67.08,58.53,64.57],[64.57,71.73,64.48,69.44],[69.44,74.56,66.52,74.22],[74.22,79.62,73.67,79.49],[79.49,85.29,77.62,83.92]],"a":[["t",9,92,"Failure swings: each high fails to take the one before","gold",0.1,"c"],["h",78.15,5,39,"gold","",true,0.15],["d",5,78.15,"gold",0.15],["h",73.2,10,39,"gold","",true,0.22],["d",10,73.2,"gold",0.22],["h",67.93,15,39,"gold","",true,0.29000000000000004],["d",15,67.93,"gold",0.29000000000000004],["h",55.69,20,39,"gold","",true,0.36],["d",20,55.69,"gold",0.36],["h",39.08,23,30,"dim","old low",true,0.45],["t",28,26.5,"High-resistance low: run, then rejected","bear",0.5,"c"],["a",30,44,37,76,"bull",0.7],["t",31,88,"Low-resistance liquidity: price cuts through","bull",0.8,"c"]]},"pdhl":{"title":"Previous day highs: the easiest draw on liquidity","tf":"D1","c":[[39.65,41.93,38.78,40.15],[40.15,45.7,39.47,43.92],[43.92,44.48,42.48,42.72],[42.72,51.42,41.35,48.75],[48.75,53.15,46.54,52.77],[52.77,52.55,49.57,51.17],[51.17,60.32,50.36,57.29],[57.29,62.37,56.66,61.87],[61.87,62.28,58.96,59.89],[59.89,67.04,58.7,66.05],[66.05,70.55,65.83,70.03],[70.03,74.54,68.5,73.82]],"a":[["h",41.93,0,1.6,"gold","",true,0.05],["h",45.7,1,2.6,"gold","",true,0.11],["h",44.48,2,3.6,"gold","",true,0.16999999999999998],["h",51.42,3,4.6,"gold","",true,0.22999999999999998],["h",53.15,4,5.6,"gold","",true,0.29],["h",52.55,5,6.6,"gold","",true,0.35],["h",60.32,6,7.6,"gold","",true,0.41],["h",62.37,7,8.6,"gold","",true,0.47],["h",62.28,8,9.6,"gold","",true,0.53],["h",67.04,9,10.6,"gold","",true,0.5900000000000001],["h",70.55,10,11.6,"gold","",true,0.65],["t",5,46.57,"Inside day (rare)","dim",0.7,"c"],["t",5.5,82,"Each day reaches for the previous day's high","gold",0.1,"c"]]},"swing4":{"title":"Daily swing low at a key level: trade day 4","tf":"D1","c":[[69.9,72.03,69.55,70.4],[70.4,71.07,65.51,67.05],[67.05,67.22,63.48,64.08],[64.08,66.23,59.51,60.88],[60.88,64.72,57.08,58.12],[58.12,59.21,52.69,54.28],[54.28,55.99,49.63,49.79],[49.79,50.589999999999996,45.79,46.39],[46.39,47.59,40.0,45.79],[45.79,51.79,44.99,50.99],[50.99,58.29,49.49,57.79],[57.79,70.49,57.79,65.87],[65.87,70.52,64.69,70.2]],"a":[["z",39,46.5,5,12,"blue","Discount PD array (daily FVG)",0.05],["t",7,42.29,"1","fg",0.2,"c"],["t",8,37,"2","fg",0.25,"c"],["t",9,41.49,"3","fg",0.3,"c"],["h",51.79,9,11,"gold","previous day high",true,0.45],["t",10,61.29,"Day 4: runs the previous day high","bull",0.55,"c"],["t",11,76.99,"Day 5","dim",0.7,"c"]]},"erl_irl":{"title":"External \u2194 internal range liquidity","tf":"D1","c":[[79.52,81.16,77.38,80.22],[80.22,80.3,71.95,72.62],[72.62,72.69,65.04,65.67],[65.67,68.26,64.69,68.04],[68.04,70.78,66.64,69.92],[69.92,70.03,62.08,62.75],[62.75,63.55,55.09,57.11],[57.11,57.21,47.46,50.39],[50.39,50.49,40.68,43.02],[43.02,43.07,33.77,35.32],[35.32,36.15,26.96,27.92],[27.92,32.42,26.42,30.78],[30.78,36.19,30.61,34.36],[34.36,38.5,33.86,37.6],[37.6,49.6,37.2,49.0],[49.0,56.8,45.5,56.0],[56.0,58.9,54.9,57.95],[57.95,60.43,57.9,59.56],[59.56,62.07,58.48,61.68],[61.68,67.22,59.26,65.49],[65.49,70.41,62.75,69.87],[69.87,71.23,63.76,65.45],[65.45,65.91,61.86,62.41],[62.41,64.1,55.05,56.9],[56.9,57.58,50.11,52.36],[52.36,52.5,49.71,50.35],[50.35,50.95,43.5,50.550000000000004],[49.57,54.33,48.5,53.15],[53.15,59.34,51.66,58.11],[58.11,62.01,57.42,61.81],[61.81,66.87,61.25,66.22],[66.22,70.43,65.02,69.48],[69.48,73.97,69.17,72.72],[72.72,75.22,72.67,75.15],[75.15,79.33,74.44,78.6],[78.6,81.12,78.32,80.72],[80.72,85.49,79.03,83.96]],"a":[["h",70.78,4,22,"gold","ERL: old high",true,0.05],["h",81.16,0,36,"gold","next ERL",true,0.05],["z",38.5,45.5,14,28,"blue","IRL: fair value gap",0.2],["t",24,76,"ERL taken \u2192 draw to IRL","bear",0.45,"c"],["a",21,66,25.5,46.5,"bear",0.5],["t",25,29.5,"IRL tagged \u2192 draw to ERL","bull",0.7,"c"],["a",27,52,34,78,"bull",0.75]]},"order_pair":{"title":"Order pairing: where smart money gets filled","tf":"4H","c":[[60.04,60.92,58.56,60.54],[60.54,60.77,54.88,55.25],[55.25,56.36,48.44,49.43],[49.43,50.22,45.69,45.7],[45.7,46.56,40.5,42.42],[42.42,49.12,41.79,47.6],[47.6,53.27,46.45,52.45],[52.45,58.33,52.28,57.74],[57.74,64.33,56.87,63.38],[63.38,70.2,62.33,68.77],[68.77,69.27,64.46,64.47],[64.47,65.25,58.51,60.37],[60.37,62.63,60.16,62.42],[62.42,67.7,60.62,66.3],[66.3,70.3,64.51,68.85],[68.85,70.97,62.4,63.19],[63.19,63.64,57.48,58.03],[58.03,58.46,50.2,51.34],[51.34,51.79,43.91,44.07],[44.07,45.07,37.2,44.47],[44.47,44.29,38.55,43.3],[43.3,49.23,43.21,47.73],[47.73,52.52,47.58,51.82],[51.82,56.26,51.05,56.16],[56.16,61.46,56.0,59.49],[59.49,64.02,58.95,62.76],[62.76,66.81,60.49,66.55],[66.55,70.57,66.18,70.11],[70.11,72.96,69.75,72.7],[72.7,76.27,71.77,75.65]],"a":[["h",40.5,4,22,"bear","sell stops below old low",true,0.05],["h",70.25,9,29,"bull","buy stops above equal highs",true,0.1],["t",19,33,"Smart money BUYS from sell stops","bull",0.35,"c"],["a",21,46,27.5,69,"bull",0.55],["t",26,78,"\u2026and SELLS into buy stops","bear",0.7,"c"]]},"orderblock":{"title":"High-probability bullish order block","tf":"1H","c":[[60.35,61.65,60.3,60.85],[60.85,60.97,57.49,57.93],[57.93,57.98,53.67,54.38],[54.38,54.93,51.28,51.72],[51.72,52.21,48.55,48.77],[48.77,49.07,44.53,45.48],[45.48,50.02,44.05,49.87],[49.87,54.94,49.11,53.9],[53.9,59.24,53.18,58.31],[58.31,63.06,57.53,61.76],[61.76,62.32,59.18,59.35],[59.35,59.52,54.63,56.05],[56.5,57.2,50.4,51.0],[51.0,51.6,43.2,45.6],[45.6,53.4,45.2,53.0],[53.0,60.74,51.95,59.98],[59.98,67.6,58.72,66.48],[66.48,67.24,64.57,64.69],[64.69,64.87,62.94,63.54],[63.54,63.71,59.76,60.55],[60.55,61.21,58.12,58.28],[58.28,59.08,47.8,52.5],[52.5,59.73,54.84,59.72],[59.72,64.65,59.68,63.48],[63.48,67.34,63.23,66.75],[66.75,70.48,66.18,70.17],[70.17,74.81,69.45,73.96],[73.96,77.91,73.69,77.79],[77.79,80.92,77.71,80.84],[80.84,84.99,79.24,83.86]],"a":[["h",44.53,5,14,"dim","short-term low (sell stops)",true,0.05],["h",63.06,9,17,"dim","last swing high",true,0.1],["z",43.2,51.0,12,29,"bull","Order block: down-close candles that ran the stops",0.3],["h",47.1,12,29,"bull","mean threshold",true,0.4],["t",16,70.6,"Break of structure","gold",0.35,"c"],["t",21,44,"Retrace into the block","fg",0.6,"c"],["a",22,54,28,82,"bull",0.75]]},"cycles":{"title":"IPDA market cycles","tf":"4H","c":[[50.85,52.28,50.31,51.35],[51.35,51.76,50.0,50.08],[50.08,50.23,48.71,49.58],[49.58,49.78,48.26,49.08],[49.08,50.76,48.32,50.68],[50.68,52.17,50.06,51.18],[51.18,52.56,50.16,51.68],[51.68,54.4,51.17,53.34],[53.34,56.56,52.88,55.78],[55.78,60.5,55.31,59.76],[59.76,63.38,59.3,63.17],[63.17,66.5,62.69,66.29],[66.29,69.72,66.16,69.54],[69.54,70.87,67.08,67.73],[67.73,68.18,65.31,65.8],[65.8,65.97,63.27,64.27],[64.27,65.36,61.84,62.71],[62.71,67.03,62.19,66.75],[66.75,70.99,66.22,70.05],[70.05,75.61,68.17,74.53],[74.53,77.62,74.45,77.47],[77.47,83.2,75.47,82.37],[82.37,85.19,81.8,82.87],[82.87,84.1,80.18,81.97],[81.97,82.08,81.05,81.35],[81.35,83.15,80.06,80.85],[80.85,81.33,80.26,80.35],[80.35,81.29,79.79,81.05],[81.05,81.76,77.4,77.91],[77.91,79.05,73.89,74.81],[74.81,78.29,74.05,77.97],[77.97,80.78,76.97,80.23],[80.23,83.25,79.44,83.02],[83.02,87.94,82.66,86.99],[86.99,91.27,86.28,90.39],[90.39,93.55,89.84,92.13],[92.13,94.67,92.04,94.36],[94.36,97.64,94.21,97.07]],"a":[["z",47.5,53.5,0,6,"blue","Consolidation",0.05],["t",10,76,"Expansion","bull",0.15,"c"],["t",15,59,"Retracement","gold",0.28,"c"],["t",19,87,"Expansion","bull",0.38,"c"],["z",78.5,84.5,21,27,"blue","Consolidation",0.5],["t",29,71,"Fake reversal = manipulation (AMD)","bear",0.65,"c"],["t",34,100,"Expansion","bull",0.8,"c"]]},"bpr":{"title":"Balanced price range makes a breakaway gap","tf":"4H","c":[[85.1,85.8,84.28,85.6],[85.6,85.92,85.04,85.1],[85.1,86.04,84.46,85.93],[85.93,86.39,79.76,80.6],[80.6,80.69,71.15,71.9],[71.9,72.56,65.32,65.6],[65.6,66.03,64.17,64.35],[64.35,64.6,61.41,62.21],[62.21,63.25,59.01,59.66],[60.0,60.5,52.0,53.0],[53.0,61.5,52.6,60.8],[60.8,61.2,50.5,51.2],[51.2,52.4,50.24,50.53],[50.53,50.67,47.36,47.58],[47.58,48.46,46.36,46.88],[46.88,47.82,45.55,45.96],[45.96,52.05,45.19,51.29],[51.29,57.74,49.48,57.56],[57.56,57.89,50.3,52.15],[52.15,53.51,46.72,47.43],[47.43,48.34,42.97,44.23],[44.23,45.0,41.06,41.88],[41.88,41.92,38.23,38.31],[38.31,39.57,34.34,35.49],[35.49,35.92,32.66,32.68],[32.68,32.7,29.77,29.94],[29.94,30.3,26.63,26.63],[26.63,26.72,23.38,23.54]],"a":[["z",72.56,79.76,3,27,"bear","FVG above: stays open = breakaway gap",0.1],["z",53.0,60.8,9,27,"gold","BPR / RDRB: down\u2013up\u2013down",0.3],["t",10,47,"down \u00b7 up \u00b7 down","gold",0.35,"c"],["t",17,63.5,"Retrace stops at the BPR","fg",0.6,"c"],["a",18,54,26,26,"bear",0.75]]},"dxy_inside":{"title":"DXY inside range: expect consolidation","tf":"D1","c":[[50,62,40,58],[57,60,46,49],[49,58,44,55],[55,59,45,47],[47,57,43,52]],"a":[["h",62,0,4.6,"gold","inside range high",true,0.1],["h",40,0,4.6,"gold","inside range low",true,0.1],["t",0,66,"Mon","dim",0.0,"c"],["t",1,66,"Tue","dim",0.0,"c"],["t",2,66,"Wed","dim",0.0,"c"],["t",3,66,"Thu","dim",0.0,"c"],["t",4,66,"Fri","dim",0.0,"c"],["t",2,36,"Day 3 fails to break \u2192 trade the crosses","fg",0.5,"c"]]},"contraction":{"title":"Small bodies come before big ranges","tf":"D1 / W1","c":[[30,39,28,38],[38,47,36,46],[46,56,44,55],[55,58,50,54],[54,57,51,55.3],[55.3,58,52,54.6],[54.6,66,54,65],[65,76,63,75],[75,84,73,83]],"a":[["z",53.5,56,2.6,5.4,"gold","Contraction: small bodies",0.3],["t",7,90,"Expansion","bull",0.6,"c"],["t",4,46,"Ignore the wicks. Read the bodies.","dim",0.45,"c"]]},"mmxm":{"title":"Market maker buy model","tf":"1H","c":[[81.02,82.48,80.27,81.53],[81.53,81.69,79.7,81.03],[81.03,81.76,80.67,81.53],[81.53,83.82,79.64,81.03],[81.03,81.79,80.23,80.53],[80.53,81.85,78.54,80.03],[80.03,80.25,76.61,77.65],[77.65,79.12,74.62,75.06],[75.06,75.49,70.37,71.83],[71.83,73.11,70.34,70.59],[70.59,70.91,67.99,68.44],[68.44,68.51,65.84,66.36],[66.36,67.06,65.67,65.86],[65.86,67.38,65.16,66.47],[66.47,69.53,65.94,67.4],[67.4,67.57,63.26,63.93],[63.93,64.64,58.57,59.28],[59.28,59.71,55.92,56.21],[56.21,57.2,53.77,54.51],[54.51,55.92,50.48,51.51],[51.51,52.04,50.15,50.18],[50.18,52.01,49.7,50.68],[50.68,52.54,48.85,50.18],[50.18,50.82,48.59,49.68],[49.68,50.61,48.28,48.42],[48.42,48.56,44.59,45.35],[45.35,45.49,41.97,42.14],[42.14,42.97,37.55,38.53],[38.53,39.88,36.0,36.23],[36.23,39.93,33.92,39.71],[39.71,44.59,39.65,43.82],[43.82,46.51,43.6,46.41],[46.41,49.05,46.21,48.88],[48.88,52.28,48.38,52.14],[52.14,53.21,51.65,53.05],[53.05,55.12,52.81,53.55],[53.55,54.23,52.68,54.05],[54.05,58.01,53.96,57.59],[57.59,60.49,56.3,60.21],[60.21,64.92,59.24,64.53],[64.53,66.51,64.21,66.27],[66.27,69.74,65.66,69.24],[69.24,72.89,68.67,71.77],[71.77,76.11,70.38,76.05],[76.05,80.38,75.87,80.28],[80.28,84.63,79.9,84.14]],"a":[["z",78.5,85,0,6,"blue","Original consolidation",0.05],["z",64.5,69,10,15,"dim","Accumulation 1",0.15],["z",48.5,53,19,24,"dim","Accumulation 2",0.25],["z",33,40,25,31,"bull","HTF discount PD array",0.35],["t",28,30,"Smart money reversal","bull",0.45,"c"],["t",12,40,"Sell side of curve","bear",0.2,"c"],["t",38,88,"Buy side of curve","bull",0.6,"c"],["a",30,46,44,82,"bull",0.7]]},"ny_bb":{"title":"New York bread & butter: bullish reversal","tf":"5m","c":[[50.36,51.21,48.73,49.51],[49.51,53.24,49.43,52.4],[52.4,54.13,52.35,53.84],[53.84,57.61,53.55,57.22],[57.22,57.28,54.21,54.85],[54.85,55.98,53.35,53.55],[53.55,53.99,50.95,51.18],[51.18,51.49,49.09,50.17],[50.17,50.67,48.47,49.08],[49.08,49.48,47.62,47.69],[47.69,48.43,46.1,47.19],[47.19,47.31,46.17,46.23],[46.23,46.88,44.82,45.82],[45.82,47.36,45.57,47.02],[47.02,47.99,46.34,47.76],[47.76,48.11,45.9,46.25],[46.25,46.66,44.21,44.26],[44.26,45.52,44.06,44.89],[44.89,46.44,44.88,45.57],[45.57,45.89,43.56,44.01],[44.01,44.22,42.93,42.94],[42.94,44.16,42.92,43.71],[43.71,45.56,43.58,44.79],[44.79,45.54,44.39,45.43],[45.43,46.89,45.11,46.23],[46.23,46.72,45.47,45.5],[45.5,46.45,43.74,44.08],[44.08,44.24,41.02,41.38],[41.38,41.78,38.0,41.0],[41.0,41.99,39.0,41.25],[41.25,43.6,40.95,43.2],[43.2,50.0,43.0,49.4],[49.4,53.8,47.4,53.1],[53.1,52.72,50.69,51.41],[51.41,51.95,50.08,50.43],[50.43,52.08,45.2,50.93],[50.93,51.82,49.37,50.44],[50.44,53.15,50.42,52.92],[52.92,56.09,51.84,54.94],[54.94,57.08,54.82,56.85],[56.85,58.84,56.77,58.51],[58.51,59.61,57.09,59.45],[59.45,61.95,58.94,61.11],[61.11,61.84,60.24,61.61],[61.61,63.76,61.23,63.53],[63.53,64.32,62.75,63.03],[63.03,64.8,63.0,64.53],[64.53,66.58,64.49,66.56]],"a":[["v",0,"dim","00:00",0.0],["v",22,"gold","08:00",0.0],["v",25,"dim","09:00",0.0],["v",34,"dim","10:30",0.0],["h",50.36,0,47,"gold","Midnight open",true,0.05],["h",43.2,16,30,"bear","London lows (sell stops)",true,0.15],["h",57.61,3,47,"bull","Asia high (target)",true,0.2],["t",28,35,"Stop hunt 09:00\u201310:30","bear",0.35,"c"],["t",32,56,"MSS","gold",0.5,"c"],["z",43.6,47.4,30,47,"bull","Entry: FVG in discount",0.6],["a",35,50,45,61,"bull",0.8]]},"judas":{"title":"News: Judas swing, then the real move","tf":"5m","c":[[59.76,60.44,58.86,59.26],[59.26,61.29,59.07,60.73],[60.73,62.21,60.24,61.28],[61.28,62.04,60.73,61.69],[61.69,61.75,60.84,61.19],[61.19,62.67,60.81,61.69],[61.69,62.47,58.59,59.44],[59.44,59.58,57.7,58.66],[58.66,58.81,57.28,57.55],[57.55,60.12,55.99,59.5],[59.5,60.09,58.43,59.0],[59.0,59.88,57.37,58.12],[58.12,58.66,56.05,56.76],[56.76,58.25,56.16,57.89],[57.89,59.19,57.84,58.87],[58.87,63.04,58.25,62.95],[62.95,70.5,62.650000000000006,66.0],[66.0,66.5,60.0,60.5],[60.5,63.34,58.18,58.48],[58.48,58.48,56.16,56.45],[56.45,57.32,52.62,53.53],[53.53,53.53,50.03,50.85],[50.85,51.74,46.65,47.9],[47.9,48.8,45.32,45.69],[45.69,46.25,43.87,44.22],[44.22,44.28,42.15,42.56],[42.56,42.78,38.96,40.22],[40.22,40.75,37.52,37.79],[37.79,37.8,35.49,36.46],[36.46,36.54,34.19,34.32],[34.32,34.43,32.76,32.95],[32.95,33.27,31.54,31.68]],"a":[["h",62.67,1,18,"bull","buy stops not yet taken",true,0.05],["h",55.99,5,31,"bear","sell stops (target)",true,0.1],["v",15,"gold","08:30 news",0.15],["t",16,74,"Fake move up runs buy stops","bull",0.35,"c"],["a",18,60,29,35,"bear",0.6],["t",25,30,"Real move: pairs with sell stops","bear",0.7,"c"]]},"asia":{"title":"Asian session model: 15m turtle soup (AUDJPY)","tf":"15m","c":[[49.08,50.65,48.55,50.24],[50.24,50.41,48.24,48.87],[48.87,49.51,47.25,47.33],[47.33,47.78,45.24,45.85],[45.85,46.19,45.16,45.31],[45.31,45.56,43.89,44.42],[44.42,46.72,44.37,46.01],[46.01,49.91,45.61,49.33],[49.33,50.73,49.19,50.59],[50.59,52.54,50.18,51.47],[51.47,52.03,49.29,49.76],[49.76,50.25,46.9,47.52],[47.52,48.72,47.06,48.02],[48.02,48.46,46.02,46.34],[46.34,46.74,41.0,45.0],[45.0,45.46,41.85,45.42],[45.42,48.37,45.13,48.11],[48.11,52.37,47.96,51.63],[51.63,55.58,51.59,54.54],[54.54,54.57,53.88,54.05],[54.05,54.25,52.41,52.56],[52.56,55.31,52.1,54.55],[54.55,57.69,54.28,57.58],[57.58,60.2,57.53,60.04],[60.04,62.75,59.11,61.4],[61.4,63.72,59.61,63.55]],"a":[["v",10,"gold","20:00 NY",0.0],["v",22,"gold","22:00 NY",0.0],["h",43.89,4,16,"bear","15m swing low",true,0.1],["t",14,37,"Swing low run inside 20:00\u201322:00","bear",0.3,"c"],["t",18,59,"MSS \u2192 enter on 2\u20135m FVG/OB","gold",0.5,"c"],["h",52.54,7,25,"bull","target: buy stops",true,0.6]]},"silver":{"title":"Silver Bullet: second stage of accumulation","tf":"15m","c":[[71.7,72.1,70.61,71.2],[71.2,72.23,71.04,71.62],[71.62,72.0,70.65,70.93],[70.93,72.56,70.84,71.81],[71.81,72.7,71.63,72.31],[72.31,73.26,65.53,66.69],[66.69,67.34,61.12,61.77],[61.77,62.72,57.76,58.12],[58.12,61.4,57.0,60.69],[60.69,60.97,53.45,53.94],[53.94,54.39,47.75,47.86],[47.86,54.19,46.93,53.18],[53.18,53.37,45.94,46.91],[46.91,47.63,39.78,40.33],[40.33,44.31,39.89,44.24],[44.24,49.12,43.51,49.07],[49.07,52.85,48.1,52.45],[52.45,56.85,51.38,56.71],[56.71,57.0,53.33,53.63],[53.63,55.32,49.57,49.98],[49.98,54.99,49.4,53.4],[53.4,56.81,53.17,56.72],[56.72,60.01,56.03,59.72],[59.72,60.95,54.31,54.84],[54.84,55.24,48.6,52.0],[52.0,53.33,47.84,53.02],[53.02,57.41,52.52,57.25],[57.25,60.45,56.7,60.43],[60.43,61.32,57.85,58.09],[58.09,58.37,53.46,53.61],[53.61,56.68,53.07,56.56],[56.56,59.87,56.55,59.87],[59.87,62.66,59.82,62.55],[62.55,65.75,61.89,65.45],[65.45,68.88,64.38,68.66],[68.66,71.45,68.62,71.37],[71.37,74.18,70.2,73.49]],"a":[["z",68.5,74.5,0,5,"blue","Original consolidation",0.05],["z",38.5,44,12,16,"bull","HTF discount array",0.12],["t",10,44.75,"STL","dim",0.2,"c"],["t",13,36.78,"LTL \u00b7 smart money reversal","bull",0.25,"c"],["t",19,46.57,"STL \u00b7 low-risk buy","dim",0.4,"c"],["h",48.6,24,27.4,"bear","stop",true,0.5],["t",24,45.1,"ITL \u00b7 protected low","gold",0.5,"c"],["t",31,49.96,"STL = Silver Bullet entry","gold",0.7,"c"],["a",30,57,35,72,"bull",0.8]]},"mitigation":{"title":"Mitigation blocks: old buying becomes new selling","tf":"1H","c":[[30.23,30.57,28.36,29.73],[29.73,30.46,28.77,30.36],[30.36,31.45,30.27,31.1],[31.1,31.61,30.63,31.6],[31.6,35.07,31.1,34.79],[34.79,37.97,34.47,37.93],[37.93,38.25,36.09,36.51],[37.5,37.9,34.4,35.0],[35.0,41.99,34.71,41.23],[41.23,48.31,41.07,47.9],[47.9,47.93,46.18,46.83],[47.6,48.0,44.4,45.0],[45.0,52.1,45.06,52.05],[52.05,57.96,51.07,57.44],[57.44,58.04,55.88,55.96],[57.5,57.9,54.4,55.0],[55.0,60.42,54.6,60.07],[60.07,66.6,59.39,66.04],[66.04,67.44,62.77,62.97],[62.97,63.12,59.12,59.61],[59.61,60.14,55.51,55.79],[55.79,56.4,49.87,50.49],[50.49,54.1,50.38,53.67],[53.67,57.25,52.45,56.77],[56.77,57.2,52.78,52.82],[52.82,53.11,48.62,48.74],[48.74,49.24,43.45,43.62],[43.62,46.65,42.92,45.64],[45.64,48.08,45.27,47.19],[47.19,47.53,43.38,43.71],[43.71,43.75,39.24,40.07],[40.07,40.86,36.13,36.55],[36.55,37.15,32.19,33.11],[33.11,33.24,30.32,30.49]],"a":[["z",54.4,57.5,15,33,"bull","old bullish OB \u2192 mitigation block",0.15],["z",44.4,47.6,11,33,"bull","old bullish OB \u2192 mitigation block",0.2],["t",17,69.6,"HTF premium \u00b7 SMR","bear",0.3,"c"],["t",23,61.25,"New bearish array inside = entry","gold",0.5,"c"],["t",28,52.08,"Add here","gold",0.65,"c"],["a",24,54,32,32,"bear",0.75]]}};
+const VIDEO_BASE = "videos/";
+</script>
+<script>
+(function () {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem("mmxm:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("mmxm:" + k, JSON.stringify(v)); } catch {} },
+};
+const view = $("#view");
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, 2200); }
+
+/* ---------------- theme ---------------- */
+const themes = ["system", "dark", "light"];
+function applyTheme() { const t = LS.get("theme", "system"); if (t === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", t); $("#themeBtn").textContent = "Theme: " + t; }
+$("#themeBtn").onclick = () => { const t = LS.get("theme", "system"); LS.set("theme", themes[(themes.indexOf(t) + 1) % 3]); applyTheme(); };
+applyTheme();
+
+/* ---------------- New York time ---------------- */
+function nyParts(d = new Date()) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", weekday: "short" }).formatToParts(d).map(x => [x.type, x.value]));
+  return { y: +p.year, mo: +p.month, d: +p.day, h: +p.hour % 24, mi: +p.minute, s: +p.second, wd: p.weekday };
+}
+function nyOffsetMin(d = new Date()) { const p = nyParts(d); return (Date.UTC(p.y, p.mo - 1, p.d, p.h, p.mi, p.s) - Math.floor(d.getTime() / 1000) * 1000) / 60000; }
+function nyToLocal(h, m) { const p = nyParts(); const utc = Date.UTC(p.y, p.mo - 1, p.d, h, m) - nyOffsetMin() * 60000; return new Date(utc).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }
+const localTZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone.split("/").pop().replace(/_/g, " "); } catch { return "local"; } })();
+const KZ = [
+  { name: "Asia", s: [20, 0], e: [22, 0], note: "AUDJPY model" },
+  { name: "London", s: [2, 0], e: [5, 0], note: "Low/high of day often here" },
+  { name: "New York", s: [8, 0], e: [12, 0], note: "Reversal sweet spot 09:00–10:30" },
+];
+function activeKZ() { const p = nyParts(); const m = p.h * 60 + p.mi; return KZ.find(k => m >= k.s[0] * 60 + k.s[1] && m < k.e[0] * 60 + k.e[1]); }
+const pad = n => String(n).padStart(2, "0");
+function tickClock() {
+  const p = nyParts(); const k = activeKZ();
+  const sweet = p.h * 60 + p.mi >= 540 && p.h * 60 + p.mi < 630;
+  const kz = k ? `<span class="kz on"><i></i>${k.name} killzone${sweet && k.name === "New York" ? " · sweet spot" : ""}</span>` : `<span class="kz"><i></i>No killzone</span>`;
+  $("#clock").innerHTML = `<span class="eyebrow">New York</span><span class="t">${pad(p.h)}:${pad(p.mi)}:${pad(p.s)}</span><span class="muted mono" style="font-size:12px">${p.wd} · ${localTZ} ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>${kz}`;
+  $("#topclock").innerHTML = `<b>MMXM Desk</b><span class="t">NY ${pad(p.h)}:${pad(p.mi)}</span>${kz}`;
+}
+tickClock(); setInterval(tickClock, 1000);
+
+/* ---------------- nav / routing ---------------- */
+const ICON = {
+  learn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6l9-3 9 3-9 3-9-3z"/><path d="M7 8v5c0 1.5 2.2 3 5 3s5-1.5 5-3V8"/></svg>',
+  playbook: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7M8 14l1.5 1.5L12 13M14 8h3M14 14h3"/></svg>',
+  videos: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>',
+  journal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h11a2 2 0 012 2v16H8a2 2 0 01-2-2z"/><path d="M6 19a2 2 0 012-2h11M10 7h6M10 11h4"/></svg>',
+  glossary: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>',
+};
+const TABS = [["learn", "Learn"], ["playbook", "Playbook"], ["videos", "Videos"], ["journal", "Journal"], ["glossary", "Glossary"]];
+$("#nav").innerHTML = TABS.map(([k, n]) => `<a href="#${k}" data-tab="${k}">${ICON[k]}<span>${n}</span></a>`).join("");
+function route() {
+  const h = (location.hash || "#learn").slice(1);
+  const tab = h.startsWith("lesson-") ? "learn" : (TABS.find(t => t[0] === h) ? h : "learn");
+  document.querySelectorAll("#nav a").forEach(a => { if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  if (h.startsWith("lesson-")) renderLesson(h.slice(7));
+  else ({ learn: renderLearn, playbook: renderPlaybook, videos: renderVideos, journal: renderJournal, glossary: renderGlossary })[tab]();
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", route);
+
+/* ---------------- diagram SVG ---------------- */
+const COLV = { gold: "#F0B952", bull: "#3FC4A0", bear: "#EE6168", blue: "#6C9FFA", dim: "#8C97AB", fg: "#E8ECF4", purp: "#B284FA" };
+function diagramSVG(key, id) {
+  const sp = DIAGRAMS[key]; if (!sp) return "";
+  const W = 960, H = 440, x0 = 30, x1 = 940, y0 = 40, y1 = 410;
+  const c = sp.c; let lo = Math.min(...c.map(k => k[2])), hi = Math.max(...c.map(k => k[1]));
+  sp.a.forEach(a => { if (a[0] === "t") { lo = Math.min(lo, a[2] - 2); hi = Math.max(hi, a[2] + 2); } });
+  const r = hi - lo; lo -= r * 0.04; hi += r * 0.06;
+  const step = (x1 - x0) / c.length, X = i => x0 + step * (i + .5), Y = p => y1 - (p - lo) / (hi - lo) * (y1 - y0);
+  const w = Math.max(3, step * .62);
+  let g = "", ann = [];
+  const at = v => `data-at="${v}"`;
+  sp.a.filter(a => a[0] === "v").forEach(a => { const x = x0 + step * a[1]; g += `<g class="an" ${at(0)}><line x1="${x}" x2="${x}" y1="${y0}" y2="${y1}" stroke="${COLV[a[2]]}" stroke-opacity=".55" stroke-dasharray="4 6"/><text x="${x + 5}" y="${y0 - 6}" fill="${COLV[a[2]]}" font-size="13" font-family="IBM Plex Mono, monospace">${esc(a[3])}</text></g>`; });
+  sp.a.filter(a => a[0] === "z").forEach(a => { const [, l, h, i0, i1, col, lab, t] = a; const xa = x0 + step * i0, xb = Math.min(x1, x0 + step * (i1 + 1)); g += `<g class="an" ${at(t)}><rect x="${xa}" y="${Y(h)}" width="${xb - xa}" height="${Math.max(2, Y(l) - Y(h))}" fill="${COLV[col]}" fill-opacity=".18" stroke="${COLV[col]}" stroke-opacity=".75"/></g>`; ann.push([t, `<text x="${xa + 4}" y="${Y(h) - 6}" fill="${COLV[col]}" font-size="13" font-weight="600">${esc(lab)}</text>`]); });
+  c.forEach((k, i) => { const [o, h, l, cl] = k; const col = cl >= o ? COLV.bull : COLV.bear; const yt = Math.min(Y(o), Y(cl)), yb = Math.max(Y(o), Y(cl)); g += `<g class="cd" data-i="${i}"><line x1="${X(i)}" x2="${X(i)}" y1="${Y(h)}" y2="${Y(l)}" stroke="${col}" stroke-width="1.6"/><rect x="${X(i) - w / 2}" y="${yt}" width="${w}" height="${Math.max(1.5, yb - yt)}" fill="${col}"/></g>`; });
+  sp.a.forEach(a => {
+    const k = a[0];
+    if (k === "h") { const [, p, i0, i1, col, lab, dash, t] = a; const xa = x0 + step * (i0 + .5), xb = Math.min(x1, x0 + step * (i1 + .5)); ann.push([t, `<line x1="${xa}" x2="${xb}" y1="${Y(p)}" y2="${Y(p)}" stroke="${COLV[col]}" stroke-width="1.6" ${dash ? 'stroke-dasharray="6 6"' : ""}/>` + (lab ? `<text x="${xb - 2}" y="${Y(p) - 6}" text-anchor="end" fill="${COLV[col]}" font-size="12.5">${esc(lab)}</text>` : "")]); }
+    else if (k === "t") { const [, i, p, s, col, t] = a; ann.push([t, `<text x="${X(i)}" y="${Y(p)}" text-anchor="middle" dominant-baseline="middle" fill="${COLV[col]}" font-size="14" font-weight="600" paint-order="stroke" stroke="#0E121C" stroke-width="5" stroke-linejoin="round">${esc(s)}</text>`]); }
+    else if (k === "a") { const [, i0, p0, i1, p1, col, t] = a; ann.push([t, `<line x1="${X(i0)}" y1="${Y(p0)}" x2="${X(i1)}" y2="${Y(p1)}" stroke="${COLV[col]}" stroke-width="2.4" marker-end="url(#ar-${id}-${col})"/>`]); }
+    else if (k === "d") { const [, i, p, col, t] = a; ann.push([t, `<circle cx="${X(i)}" cy="${Y(p)}" r="4.5" fill="${COLV[col]}"/>`]); }
+  });
+  ann.sort((a, b) => a[0] - b[0]);
+  const marks = Object.entries(COLV).map(([n, v]) => `<marker id="ar-${id}-${n}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${v}"/></marker>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(sp.title)}" font-family="IBM Plex Sans, system-ui, sans-serif"><defs>${marks}</defs>${g}${ann.map(([t, s]) => `<g class="an" data-at="${t}">${s}</g>`).join("")}<text x="${x1}" y="${H - 6}" text-anchor="end" fill="#8C97AB" font-size="12" font-family="IBM Plex Mono, monospace">${esc(sp.tf)}</text></svg>`;
+}
+function chartPanel(key, id) {
+  const sp = DIAGRAMS[key]; if (!sp) return "";
+  return `<figure class="chartbox" style="margin:0" id="fig-${id}"><div class="chartbar"><b>${esc(sp.title)}</b><button type="button" data-play="${id}">▶ Play step by step</button></div>${diagramSVG(key, id)}</figure>`;
+}
+function playDiagram(id) {
+  const fig = document.getElementById("fig-" + id); if (!fig) return;
+  const cds = [...fig.querySelectorAll(".cd")], ans = [...fig.querySelectorAll(".an")];
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) return;
+  cds.forEach(e => e.style.opacity = 0); ans.forEach(e => e.style.opacity = 0);
+  const T = 6000, t0 = performance.now();
+  (function f(now) {
+    const p = Math.min(1, (now - t0) / T);
+    cds.forEach((e, i) => e.style.opacity = p * 2.6 * cds.length > i ? 1 : 0);
+    ans.forEach(e => { const at = +e.dataset.at; e.style.transition = "opacity .4s"; e.style.opacity = p >= at * 0.38 + (at > 0 ? 0.3 : 0) ? 1 : 0; });
+    if (p < 1) requestAnimationFrame(f); else { cds.forEach(e => e.style.opacity = ""); ans.forEach(e => e.style.opacity = ""); }
+  })(t0);
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-play]"); if (b) playDiagram(b.dataset.play); });
+
+/* ---------------- LEARN ---------------- */
+const done = () => LS.get("done", {});
+function renderLearn() {
+  const d = done(); const n = LESSONS.filter(l => d[l.id]).length;
+  const next = LESSONS.find(l => !d[l.id]) || LESSONS[0];
+  let h = `<section class="hero"><span class="eyebrow">MMXM Traders mentorship · reorganised</span><h1>Learn the method in order</h1>
+  <p>${LESSONS.length} lessons from your 23 videos. Core tools first, then market maker models, then top-down analysis, then complete models and risk. Each lesson has a chart, rules, a procedure and a self-check.</p>
+  <div style="display:grid;gap:6px;max-width:420px"><div class="progress"><i style="width:${Math.round(n / LESSONS.length * 100)}%"></i></div><span class="mono muted" style="font-size:12px">${n} of ${LESSONS.length} complete</span></div>
+  <div><a class="btn gold" href="#lesson-${next.id}">${n ? "Continue" : "Start"}: ${esc(next.title)} →</a></div></section>
+  <nav class="path" aria-label="Course path">${MODULES.map((m, i) => `<a href="#lesson-${LESSONS.find(l => l.m === m.id).id}"><span>${i}</span><b>${esc(m.name)}</b></a>`).join("")}</nav>`;
+  MODULES.forEach((m, mi) => {
+    const ls = LESSONS.filter(l => l.m === m.id);
+    h += `<section class="mod"><div class="mod-h"><div><span class="eyebrow">Module ${mi}</span><h2>${esc(m.name)}</h2></div><span class="muted" style="font-size:14px;max-width:46ch">${esc(m.blurb)}</span></div><div class="lessons">`;
+    ls.forEach((l, i) => {
+      h += `<a class="lrow" href="#lesson-${l.id}"><span class="n">${mi}.${i + 1}</span><span style="min-width:0"><span class="tt">${esc(l.title)}</span>${l.bridge ? '<span class="bridge">bridge</span>' : ""}<span class="sub" style="display:block">${esc(l.summary)}</span></span><span class="done-dot ${d[l.id] ? "on" : ""}" aria-label="${d[l.id] ? "complete" : "not complete"}"></span></a>`;
+    });
+    h += `</div></section>`;
+  });
+  view.innerHTML = h;
+}
+function renderLesson(id) {
+  const i = LESSONS.findIndex(l => l.id === id); if (i < 0) { location.hash = "#learn"; return; }
+  const l = LESSONS[i], m = MODULES.find(x => x.id === l.m), mi = MODULES.indexOf(m), num = LESSONS.filter(x => x.m === l.m).indexOf(l) + 1;
+  const prev = LESSONS[i - 1], next = LESSONS[i + 1], d = done();
+  const vid = VIDEOS.find(v => v.id === l.video);
+  let h = `<div class="crumbs"><a href="#learn">Learn</a><span>/</span><span>Module ${mi} · ${esc(m.name)}</span></div>
+  <header style="display:grid;gap:10px"><span class="eyebrow">Lesson ${mi}.${num}${l.bridge ? " · bridge lesson" : ""}</span><h1>${esc(l.title)}</h1><p class="lead">${esc(l.summary)}</p><span class="src">Source: ${esc(l.src)}</span></header>`;
+  if (l.diagram) h += chartPanel(l.diagram, "a");
+  h += `<section class="sec"><h2>Terms</h2><dl class="defs">${l.what.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl></section>`;
+  h += `<section class="sec"><h2>Rules</h2><ul class="rules">${l.rules.map(r => `<li>${esc(r)}</li>`).join("")}</ul></section>`;
+  if (l.diagram2) h += chartPanel(l.diagram2, "b");
+  h += `<section class="sec"><h2>Procedure</h2><ol class="proc">${l.steps.map(r => `<li>${esc(r)}</li>`).join("")}</ol></section>`;
+  h += `<section class="warn"><b>Warning</b>${l.mistakes.map(x => `<p>${esc(x)}</p>`).join("")}</section>`;
+  if (vid) h += `<section class="sec"><h2>Explainer video</h2>${videoEl(vid)}<span class="muted" style="font-size:13px">${esc(vid.title)} · under 2 minutes</span></section>`;
+  h += `<section class="panel check"><div style="display:grid;gap:6px;max-width:60ch"><span class="eyebrow">Self-check</span>${l.check.map(q => `<p style="font-weight:600">${esc(q)}</p>`).join("")}<span class="muted" style="font-size:13px">Answer from memory. Then find one example on your own chart and log it as a backtest.</span></div>
+    <label class="tick"><input type="checkbox" id="doneBox" ${d[l.id] ? "checked" : ""}><span>Lesson complete</span></label></section>`;
+  h += `<nav class="navpair">${prev ? `<a class="btn" href="#lesson-${prev.id}">← ${esc(prev.title)}</a>` : "<span></span>"}${next ? `<a class="btn pri" href="#lesson-${next.id}">${esc(next.title)} →</a>` : `<a class="btn pri" href="#playbook">Open the playbook →</a>`}</nav>`;
+  view.innerHTML = h;
+  $("#doneBox").onchange = e => { const dd = done(); dd[l.id] = e.target.checked; LS.set("done", dd); toast(e.target.checked ? "Marked complete" : "Marked not complete"); };
+}
+function videoEl(v) { return `<video controls preload="none" playsinline poster="${VIDEO_BASE}${v.id}.jpg" src="${VIDEO_BASE}${v.id}.mp4" onerror="this.outerHTML='<div class=vmissing>Video not available offline. Open the app online to watch.</div>'"></video>`; }
+
+/* ---------------- PLAYBOOK ---------------- */
+function todayKey() { const p = nyParts(); return `${p.y}-${pad(p.mo)}-${pad(p.d)}`; }
+function renderPlaybook() {
+  const ck = LS.get("pb", {}); const tk = todayKey(); const today = ck[tk] || {};
+  let h = `<header style="display:grid;gap:10px"><span class="eyebrow">Step-by-step trading procedure</span><h1>Playbook</h1><p class="lead">Do these steps in order. The ticks reset each New York day. Each step links to the lesson that explains it.</p></header>`;
+  h += `<section class="sec"><h2>Killzones in your time</h2><div class="times">${KZ.map(k => `<div class="tz"><b>${k.name}</b><span class="mono">${pad(k.s[0])}:${pad(k.s[1])}–${pad(k.e[0])}:${pad(k.e[1])} NY</span><span class="mono" style="color:var(--gold)">${nyToLocal(...k.s)}–${nyToLocal(...k.e)} ${esc(localTZ)}</span><span class="muted" style="font-size:12px">${k.note}</span></div>`).join("")}</div>
+  <p class="muted" style="font-size:13px">Midnight open (00:00 NY) is <b class="mono" style="color:var(--fg)">${nyToLocal(0, 0)}</b> in ${esc(localTZ)} today. The UK and US change clocks on different dates, so check this in March and November.</p></section>`;
+  h += `<section class="sec"><div class="mod-h"><h2>Procedure</h2><button class="btn sm" id="pbReset" type="button">Clear today's ticks</button></div><div>`;
+  PLAYBOOK.forEach((p, pi) => {
+    const L = LESSONS.find(l => l.id === p.lesson);
+    h += `<div class="phase"><div class="when">${String(pi).padStart(2, "0")} · ${esc(p.phase)}</div><div class="body"><h3>${esc(p.title)}</h3>${p.do.map((t, ti) => `<label class="tick"><input type="checkbox" data-k="${p.id}.${ti}" ${today[p.id + "." + ti] ? "checked" : ""}><span>${esc(t)}</span></label>`).join("")}<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:baseline"><span class="out">→ Write down: ${esc(p.out)}</span>${L ? `<a href="#lesson-${L.id}" style="font-size:13px;color:var(--muted)">Lesson: ${esc(L.title)}</a>` : ""}</div></div></div>`;
+  });
+  h += `</div></section>`;
+  h += riskCalcHTML();
+  view.innerHTML = h;
+  view.querySelectorAll("input[data-k]").forEach(i => i.onchange = () => { const all = LS.get("pb", {}); const t = all[tk] || {}; t[i.dataset.k] = i.checked; Object.keys(all).forEach(k => { if (k !== tk) delete all[k]; }); all[tk] = t; LS.set("pb", all); });
+  $("#pbReset").onclick = () => { const all = LS.get("pb", {}); delete all[tk]; LS.set("pb", all); renderPlaybook(); };
+  wireRisk();
+}
+function riskCalcHTML() {
+  const s = LS.get("risk", { phase: "p1", opt: "A", bal: 100000, pl: 0, stop: 15, pip: 10 });
+  return `<section class="panel sec" id="risk"><span class="eyebrow">Funded-account risk plan</span><h2>Risk calculator</h2>
+  <div class="calc">
+    <label class="f">Account phase<select class="inp" id="rPhase"><option value="p1">Phase 1 (8%)</option><option value="p2">Phase 2 (5%)</option><option value="live">Live funded</option></select></label>
+    <label class="f">Plan option<select class="inp" id="rOpt"><option value="A">Option A</option><option value="B">Option B</option></select></label>
+    <label class="f">Starting balance<input class="inp mono" id="rBal" type="number" inputmode="decimal" value="${s.bal}"></label>
+    <label class="f">Current P/L %<input class="inp mono" id="rPl" type="number" step="0.1" inputmode="decimal" value="${s.pl}"></label>
+    <label class="f">Stop distance (pips)<input class="inp mono" id="rStop" type="number" step="0.1" inputmode="decimal" value="${s.stop}"></label>
+    <label class="f">Pip value per lot<input class="inp mono" id="rPip" type="number" step="0.01" inputmode="decimal" value="${s.pip}"></label>
+  </div><div class="result" id="rOut"></div><p class="muted" style="font-size:13px">Rules from lesson 4.3. Pip value: EURUSD ≈ 10 per standard lot in USD.</p></section>`;
+}
+function riskRule(phase, opt, pl) {
+  if (phase === "live") {
+    if (pl >= 2) return { r: 0, rr: "—", msg: "You are at +2% or more. Stop. Take the payout. Move to the next account." };
+    if (pl >= 1) return { r: 1, rr: "1:2 or 1:3", msg: "You have a buffer. Risk 1%." };
+    return { r: 0.5, rr: "1:2", msg: pl < 0 ? "Below break-even. Risk 0.5% or less. Never more." : "Start: risk 0.5% for a 1% buffer." };
+  }
+  const target = phase === "p1" ? 8 : 5;
+  if (pl >= target) return { r: 0, rr: "—", msg: "Target reached. Stop trading this phase." };
+  if (pl < 0) return { r: 1, rr: opt === "A" ? "1:2" : "1:3", msg: "Below break-even. Risk 1% or less. Never more." };
+  const buf = opt === "A" ? 2 : 3;
+  if (pl >= buf - 0.05) {
+    if (phase === "p1") return { r: 2, rr: opt === "A" ? "1:3" : "1:2.5", msg: `Buffer built. Trade 2: risk 2% → +${opt === "A" ? 6 : 5}%.` };
+    return { r: 1, rr: opt === "A" ? "1:3" : "1:2", msg: `Buffer built. Trade 2: risk 1% → +${opt === "A" ? 3 : 2}%.` };
+  }
+  return { r: 1, rr: opt === "A" ? "1:2" : "1:3", msg: `Trade 1: risk 1% to build a ${buf}% buffer.` };
+}
+function wireRisk() {
+  const ids = ["rPhase", "rOpt", "rBal", "rPl", "rStop", "rPip"]; const s = LS.get("risk", { phase: "p1", opt: "A" });
+  $("#rPhase").value = s.phase || "p1"; $("#rOpt").value = s.opt || "A";
+  const calc = () => {
+    const v = { phase: $("#rPhase").value, opt: $("#rOpt").value, bal: +$("#rBal").value || 0, pl: +$("#rPl").value || 0, stop: +$("#rStop").value || 0, pip: +$("#rPip").value || 0 };
+    LS.set("risk", v);
+    const r = riskRule(v.phase, v.opt, v.pl); const amt = v.bal * r.r / 100; const lots = v.stop > 0 && v.pip > 0 ? amt / (v.stop * v.pip) : 0;
+    $("#rOut").innerHTML = `<div><div class="muted" style="font-size:12px">Risk</div><div class="big">${r.r}%</div></div><div><div class="muted" style="font-size:12px">Amount</div><div class="big">${amt.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div></div><div><div class="muted" style="font-size:12px">Target R:R</div><div class="big">${r.rr}</div></div><div><div class="muted" style="font-size:12px">Position size</div><div class="big">${lots ? lots.toFixed(2) : "—"} <span style="font-size:14px">lots</span></div></div><p style="flex-basis:100%;font-weight:600">${esc(r.msg)}</p>`;
+  };
+  ids.forEach(i => $("#" + i).oninput = calc); calc();
+}
+
+/* ---------------- VIDEOS ---------------- */
+function renderVideos() {
+  view.innerHTML = `<header style="display:grid;gap:10px"><span class="eyebrow">Explainers · each under 2 minutes</span><h1>Videos</h1><p class="lead">Ten animated explainers. Watch each one before its lessons, then again after. Narration uses a free local voice model.</p></header>
+  <div class="vgrid">${VIDEOS.map((v, i) => `<div class="vcard">${videoEl(v)}<div class="meta"><b>${i + 1}. ${esc(v.title)}</b></div><div style="display:flex;gap:10px;flex-wrap:wrap">${v.lessons.map(id => { const l = LESSONS.find(x => x.id === id); return l ? `<a href="#lesson-${l.id}">${esc(l.title)}</a>` : ""; }).join("")}</div></div>`).join("")}</div>`;
+}
+
+/* ---------------- GLOSSARY ---------------- */
+function renderGlossary() {
+  view.innerHTML = `<header style="display:grid;gap:10px"><span class="eyebrow">One word, one meaning</span><h1>Glossary</h1></header><input class="inp search" id="gq" type="search" placeholder="Search terms" aria-label="Search terms"><dl class="gl" id="gl"></dl>`;
+  const draw = q => $("#gl").innerHTML = GLOSSARY.filter(([k, v]) => !q || (k + " " + v).toLowerCase().includes(q.toLowerCase())).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("") || `<dd class="muted">No match.</dd>`;
+  $("#gq").oninput = e => draw(e.target.value); draw("");
+}
+
+/* ---------------- JOURNAL STORE ---------------- */
+const Store = { mode: "pending", entries: [], ready: null, uid: null, db: null, assets: null, dl: null };
+function idbOpen() { return new Promise((res, rej) => { try { const r = indexedDB.open("mmxm-journal", 1); r.onupgradeneeded = () => { r.result.createObjectStore("entries", { keyPath: "id" }); r.result.createObjectStore("imgs"); }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); } }); }
+function idbDo(store, mode, fn) { return Store.idb ? new Promise((res, rej) => { const tx = Store.idb.transaction(store, mode); const s = tx.objectStore(store); const r = fn(s); tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); }) : Promise.resolve(null); }
+Store.ready = (async () => {
+  try {
+    if (window.claude && claude.use) {
+      const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+      if (db && user) {
+        Store.uid = await user.id();
+        if (Store.uid) {
+          Store.db = db; Store.mode = "cloud";
+          claude.use("assets").then(a => Store.assets = a).catch(() => {});
+          claude.use("downloads").then(d => Store.dl = d).catch(() => {});
+          await new Promise(res => {
+            const tm = setTimeout(res, 10000);
+            db.collection("data/users/" + Store.uid).onSnapshot(snap => {
+              clearTimeout(tm);
+              Store.entries = snap.docs.filter(d => d.id.startsWith("t_")).map(d => ({ ...d.data(), id: d.id }));
+              res(); if ((location.hash || "") === "#journal" && !Store.editing) renderJournal();
+            }, () => { clearTimeout(tm); res(); });
+          });
+          return;
+        }
+      }
+    }
+  } catch (e) { /* fall through to local */ }
+  Store.mode = "local";
+  try { Store.idb = await idbOpen(); const all = await idbDo("entries", "readonly", s => s.getAll()); Store.entries = all || []; }
+  catch { Store.mode = "memory"; Store.entries = []; }
+})();
+async function saveEntry(e) {
+  e.updated = new Date().toISOString();
+  if (Store.mode === "cloud") { const { id, ...data } = e; await Store.db.doc(`data/users/${Store.uid}/${id}`).set(JSON.parse(JSON.stringify(data))); }
+  else { await idbDo("entries", "readwrite", s => s.put(JSON.parse(JSON.stringify(e)))); }
+  const i = Store.entries.findIndex(x => x.id === e.id); if (i >= 0) Store.entries[i] = e; else Store.entries.push(e);
+}
+async function deleteEntry(id) {
+  const e = Store.entries.find(x => x.id === id);
+  if (Store.mode === "cloud") { await Store.db.doc(`data/users/${Store.uid}/${id}`).delete(); if (Store.assets && e) for (const im of imgsOf(e)) if (im.asset) Store.assets.delete(im.asset).catch(() => {}); }
+  else { await idbDo("entries", "readwrite", s => s.delete(id)); if (e) for (const im of imgsOf(e)) if (im.lid) await idbDo("imgs", "readwrite", s => s.delete(im.lid)); }
+  Store.entries = Store.entries.filter(x => x.id !== id);
+}
+const imgsOf = e => ["htfImg", "m15Img", "exImg"].flatMap(k => e[k] || []);
+async function shrink(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    const sc = Math.min(1, 1800 / Math.max(img.width, img.height)); const cv = document.createElement("canvas");
+    cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc); cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+    return await new Promise(res => cv.toBlob(res, "image/jpeg", 0.86));
+  } finally { URL.revokeObjectURL(url); }
+}
+async function storeImage(file) {
+  const blob = await shrink(file);
+  if (Store.mode === "cloud" && Store.assets) { const r = await Store.assets.upload(blob); return { asset: r.id, url: r.url }; }
+  const lid = "i_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  if (Store.mode === "local") { await idbDo("imgs", "readwrite", s => s.put(blob, lid)); }
+  else { Store.mem = Store.mem || {}; Store.mem[lid] = blob; }
+  return { lid };
+}
+const urlCache = {};
+async function imgURL(im) {
+  if (im.url) return im.url; if (im.data) return im.data;
+  if (urlCache[im.lid]) return urlCache[im.lid];
+  const b = Store.mode === "local" ? await idbDo("imgs", "readonly", s => s.get(im.lid)) : (Store.mem || {})[im.lid];
+  return b ? (urlCache[im.lid] = URL.createObjectURL(b)) : "";
+}
+
+/* ---------------- JOURNAL UI ---------------- */
+const blank = () => ({ id: "t_" + Date.now().toString(36), created: new Date().toISOString(), date: todayKey(), kind: "Live" });
+function rOf(e) { const v = parseFloat(e.rr); if (!isNaN(v)) return v; if (e.result === "Loss") return -1; if (e.result === "Break-even") return 0; return null; }
+function plannedR(e) { const en = +e.entry, st = +e.stop, tg = +e.target; if (!en || !st || !tg || en === st) return null; return Math.abs(tg - en) / Math.abs(en - st); }
+async function renderJournal() {
+  Store.editing = null;
+  view.innerHTML = `<header style="display:grid;gap:10px"><span class="eyebrow">3-step journal</span><h1>Journal</h1></header><p class="status">Opening your journal…</p>`;
+  await Store.ready;
+  if ((location.hash || "#learn") !== "#journal") return;
+  const E = [...Store.entries].sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.created || "").localeCompare(a.created || ""));
+  const trades = E.filter(e => e.kind !== "No trade" && e.result && e.result !== "Open");
+  const wins = trades.filter(e => e.result === "Win").length, losses = trades.filter(e => e.result === "Loss").length;
+  const Rs = trades.map(rOf).filter(v => v != null); const tot = Rs.reduce((a, b) => a + b, 0);
+  const where = Store.mode === "cloud" ? "Saved to your account. Private to you." : Store.mode === "local" ? "Saved in this browser on this device." : "Not saved: storage is blocked here. Export before you leave.";
+  let h = `<header style="display:grid;gap:10px"><span class="eyebrow">3-step journal</span><h1>Journal</h1><p class="lead">One entry per trade, backtest or no-trade day. Step 1: HTF chart(s). Step 2: 15m chart. Step 3: execution chart. Each field tells you what to input and where to find it.</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" id="jNew" type="button">+ New entry</button><button class="btn sm" id="jExp" type="button">Export</button><label class="btn sm" style="cursor:pointer">Import<input type="file" id="jImp" accept="application/json" hidden></label><span class="status">${where}</span></div></header>`;
+  if (!E.length) {
+    h += `<section class="empty"><h2>No entries yet</h2><p class="muted">Your trades will appear here with win rate, total R and an equity curve. Press <b>New entry</b> to log your first trade or backtest.</p><div class="three"><div><b>1 · HTF chart(s)</b>Point of interest, draw on liquidity, SMT.</div><div><b>2 · 15m chart</b>Midnight open, Asia, London, New York, red folders.</div><div><b>3 · Execution chart</b>Your entry model, position tool, HTF POIs.</div></div></section>`;
+  } else {
+    h += `<section class="stats"><div class="stat"><b>${trades.length}</b><span>closed trades</span></div><div class="stat"><b>${trades.length ? Math.round(wins / trades.length * 100) : 0}%</b><span>win rate (${wins}W · ${losses}L)</span></div><div class="stat"><b style="color:${tot >= 0 ? "var(--bull)" : "var(--bear)"}">${tot >= 0 ? "+" : ""}${tot.toFixed(1)}R</b><span>total R</span></div><div class="stat"><b>${Rs.length ? (tot / Rs.length).toFixed(2) : "0.00"}R</b><span>average R</span></div></section>`;
+    h += equityHTML(trades.slice().reverse());
+    h += byModelHTML(trades);
+    h += `<section class="jlist">${E.map(e => { const r = rOf(e); const cls = e.result === "Win" ? "win" : e.result === "Loss" ? "loss" : ""; return `<button class="jrow" type="button" data-id="${e.id}"><span class="mono d" style="font-size:13px">${esc(e.date || "")}</span><span style="min-width:0"><b>${esc(e.pair || "—")}</b> <span class="muted">${esc(e.dir || "")} · ${esc(e.model || "no model")}</span>${e.kind && e.kind !== "Live" ? ` <span class="pill">${esc(e.kind)}</span>` : ""}</span><span class="pill ${cls}">${esc(e.result || (e.kind === "No trade" ? "No trade" : "Draft"))}${r != null && e.result !== "Break-even" ? ` · ${r > 0 ? "+" : ""}${r}R` : ""}</span><span class="pill gold">${esc(e.grade || "–")}</span></button>`; }).join("")}</section>`;
+  }
+  view.innerHTML = h;
+  $("#jNew").onclick = () => openEditor(blank(), 0);
+  $("#jExp").onclick = exportJournal;
+  $("#jImp").onchange = importJournal;
+  view.querySelectorAll(".jrow").forEach(b => b.onclick = () => openDetail(b.dataset.id));
+}
+function equityHTML(tr) {
+  const pts = [0]; tr.forEach(e => { const r = rOf(e); pts.push(pts[pts.length - 1] + (r ?? 0)); });
+  if (pts.length < 3) return "";
+  const W = 800, H = 140, mn = Math.min(0, ...pts), mx = Math.max(0, ...pts), rg = mx - mn || 1;
+  const X = i => 8 + i * (W - 16) / (pts.length - 1), Y = v => H - 14 - (v - mn) / rg * (H - 30);
+  const line = pts.map((v, i) => `${i ? "L" : "M"}${X(i).toFixed(1)} ${Y(v).toFixed(1)}`).join("");
+  const last = pts[pts.length - 1];
+  return `<section class="eq"><div style="display:flex;justify-content:space-between"><span class="eyebrow">Equity curve (R)</span><span class="mono muted" style="font-size:12px">${pts.length - 1} trades</span></div><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Cumulative R"><line x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--line)" stroke-dasharray="4 4"/><path d="${line} L${X(pts.length - 1)} ${Y(0)} L${X(0)} ${Y(0)}Z" fill="var(--gold)" fill-opacity=".12"/><path d="${line}" fill="none" stroke="var(--gold)" stroke-width="2" vector-effect="non-scaling-stroke"/><circle cx="${X(pts.length - 1)}" cy="${Y(last)}" r="4" fill="var(--gold)"/></svg></section>`;
+}
+function byModelHTML(tr) {
+  const m = {}; tr.forEach(e => { const k = e.model || "No model"; m[k] = m[k] || { n: 0, w: 0, r: 0 }; m[k].n++; if (e.result === "Win") m[k].w++; m[k].r += rOf(e) ?? 0; });
+  const rows = Object.entries(m); if (!rows.length) return "";
+  return `<section class="panel" style="overflow-x:auto"><span class="eyebrow">By model</span><table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:14px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th style="padding:6px 0">Model</th><th>Trades</th><th>Win %</th><th>Total R</th></tr></thead><tbody>${rows.map(([k, v]) => `<tr style="border-top:1px solid var(--line)"><td style="padding:8px 8px 8px 0">${esc(k)}</td><td class="mono">${v.n}</td><td class="mono">${Math.round(v.w / v.n * 100)}%</td><td class="mono" style="color:${v.r >= 0 ? "var(--bull)" : "var(--bear)"}">${v.r >= 0 ? "+" : ""}${v.r.toFixed(1)}</td></tr>`).join("")}</tbody></table></section>`;
+}
+function fieldFilled(e, f) { const v = e[f[0]]; return Array.isArray(v) ? v.length > 0 : v != null && v !== ""; }
+function openEditor(entry, stepIdx) {
+  Store.editing = entry; const e = JSON.parse(JSON.stringify(entry));
+  const draw = () => {
+    const S = JOURNAL[stepIdx];
+    let h = `<div class="crumbs"><a href="#journal" id="jBack">Journal</a><span>/</span><span>${Store.entries.some(x => x.id === e.id) ? "Edit entry" : "New entry"}</span></div>
+    <div class="steps" role="tablist">${JOURNAL.map((s, i) => { const n = s.fields.filter(f => fieldFilled(e, f)).length; return `<button type="button" data-step="${i}" ${i === stepIdx ? 'aria-current="step"' : ""}>${esc(s.step)}<span class="c">${n}/${s.fields.length}</span></button>`; }).join("")}</div>
+    <header style="display:grid;gap:6px"><h2>${esc(S.step)}</h2><p class="muted">${esc(S.sub)}</p></header><div>`;
+    S.fields.forEach(f => {
+      const [k, label, type, inp, where, opts, ph] = f; const v = e[k];
+      h += `<div class="field"><div class="lab"><label for="f_${k}">${esc(label)}</label>${fieldFilled(e, f) ? '<span class="ok">✓</span>' : ""}</div><div class="hint"><b>INPUT</b><span>${esc(inp)}</span><b>WHERE</b><span>${esc(where)}</span></div>`;
+      if (type === "text") h += `<input class="inp" id="f_${k}" data-k="${k}" value="${esc(v || "")}" placeholder="${esc(ph || "")}">`;
+      else if (type === "num") h += `<input class="inp mono" id="f_${k}" data-k="${k}" type="number" step="any" inputmode="decimal" value="${esc(v ?? "")}" style="max-width:240px">`;
+      else if (type === "date") h += `<input class="inp mono" id="f_${k}" data-k="${k}" type="date" value="${esc(v || "")}" style="max-width:240px">`;
+      else if (type === "textarea") h += `<textarea class="inp" id="f_${k}" data-k="${k}">${esc(v || "")}</textarea>`;
+      else if (type === "chips" || type === "multi") h += `<div class="chips" id="f_${k}" role="group" aria-label="${esc(label)}">${opts.map(o => { const on = type === "multi" ? (v || []).includes(o) : v === o; return `<button type="button" class="chip" data-chip="${k}" data-multi="${type === "multi" ? 1 : 0}" data-v="${esc(o)}" aria-pressed="${on}">${esc(o)}</button>`; }).join("")}</div>`;
+      else if (type === "images") h += `<div class="drop" data-drop="${k}"><div class="thumbs" id="th_${k}"></div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label class="btn sm" style="cursor:pointer">Add screenshot<input type="file" accept="image/*" multiple hidden data-file="${k}" id="f_${k}"></label><span class="muted" style="font-size:12px">or drop / paste an image here</span></div></div>`;
+      if (k === "target") { const pr = plannedR(e); h += `<span class="calcR" id="planR">${pr ? `Planned R:R = 1:${pr.toFixed(2)}` : "Planned R:R appears when entry, stop and target are filled."}</span>`; }
+      h += `</div>`;
+    });
+    h += `</div><div class="formnav"><div style="display:flex;gap:8px;flex-wrap:wrap">${stepIdx > 0 ? `<button class="btn" type="button" id="jPrev">← Back</button>` : ""}<button class="btn" type="button" id="jCancel">Cancel</button></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="jSave">Save</button>${stepIdx < JOURNAL.length - 1 ? `<button class="btn pri" type="button" id="jNext">Next: ${esc(JOURNAL[stepIdx + 1].step)} →</button>` : `<button class="btn gold" type="button" id="jDone">Save entry ✓</button>`}</div></div>`;
+    view.innerHTML = h; window.scrollTo(0, 0);
+    view.querySelectorAll("[data-k]").forEach(i => i.oninput = () => { e[i.dataset.k] = i.type === "number" ? (i.value === "" ? "" : +i.value) : i.value; if (["entry", "stop", "target"].includes(i.dataset.k) && $("#planR")) { const pr = plannedR(e); $("#planR").textContent = pr ? `Planned R:R = 1:${pr.toFixed(2)}` : "Planned R:R appears when entry, stop and target are filled."; } });
+    view.querySelectorAll("[data-chip]").forEach(b => b.onclick = () => {
+      const k = b.dataset.chip, val = b.dataset.v;
+      if (b.dataset.multi === "1") { const a = new Set(e[k] || []); a.has(val) ? a.delete(val) : a.add(val); e[k] = [...a]; b.setAttribute("aria-pressed", a.has(val)); }
+      else { e[k] = e[k] === val ? "" : val; view.querySelectorAll(`[data-chip="${k}"]`).forEach(x => x.setAttribute("aria-pressed", x.dataset.v === e[k])); }
+      if (k === "result" && e.result === "Loss" && (e.rr === "" || e.rr == null)) { e.rr = -1; const r = $("#f_rr"); if (r) r.value = -1; }
+      if (k === "result" && e.result === "Break-even" && (e.rr === "" || e.rr == null)) { e.rr = 0; const r = $("#f_rr"); if (r) r.value = 0; }
+    });
+    const addFiles = async (k, files) => { for (const f of files) { if (!f.type.startsWith("image/")) continue; try { const im = await storeImage(f); e[k] = [...(e[k] || []), im]; } catch (err) { toast("Could not add the image. Try a smaller file."); } } drawThumbs(k); };
+    const drawThumbs = async k => { const box = $("#th_" + k); if (!box) return; const list = e[k] || []; const urls = await Promise.all(list.map(imgURL)); box.innerHTML = list.map((im, i) => `<div class="thumb"><img src="${esc(urls[i])}" alt="Chart screenshot ${i + 1}"><button type="button" data-rm="${k}:${i}">Remove</button></div>`).join(""); box.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { const [kk, ii] = b.dataset.rm.split(":"); e[kk].splice(+ii, 1); drawThumbs(kk); }); };
+    view.querySelectorAll("[data-file]").forEach(i => { drawThumbs(i.dataset.file); i.onchange = () => addFiles(i.dataset.file, [...i.files]); });
+    view.querySelectorAll("[data-drop]").forEach(d => { const k = d.dataset.drop; d.ondragover = ev => { ev.preventDefault(); d.classList.add("over"); }; d.ondragleave = () => d.classList.remove("over"); d.ondrop = ev => { ev.preventDefault(); d.classList.remove("over"); addFiles(k, [...ev.dataTransfer.files]); }; });
+    document.onpaste = ev => { const dz = view.querySelector("[data-drop]"); if (!dz) return; const fs = [...(ev.clipboardData?.files || [])]; if (fs.length) addFiles(dz.dataset.drop, fs); };
+    view.querySelectorAll("[data-step]").forEach(b => b.onclick = () => { stepIdx = +b.dataset.step; draw(); });
+    const save = async (msg) => { try { await saveEntry(e); Object.assign(entry, e); toast(msg || "Saved"); return true; } catch (err) { toast("Not saved. Check your connection and try again."); return false; } };
+    $("#jBack").onclick = ev => { ev.preventDefault(); document.onpaste = null; Store.editing = null; renderJournal(); };
+    $("#jCancel").onclick = () => { document.onpaste = null; Store.editing = null; renderJournal(); };
+    $("#jSave").onclick = () => save();
+    if ($("#jPrev")) $("#jPrev").onclick = () => { stepIdx--; draw(); };
+    if ($("#jNext")) $("#jNext").onclick = async () => { stepIdx++; draw(); };
+    if ($("#jDone")) $("#jDone").onclick = async () => { if (await save("Entry saved")) { document.onpaste = null; openDetail(e.id); } };
+  };
+  draw();
+}
+async function openDetail(id) {
+  const e = Store.entries.find(x => x.id === id); if (!e) return renderJournal();
+  Store.editing = e;
+  let h = `<div class="crumbs"><a href="#journal" id="jBack">Journal</a><span>/</span><span>${esc(e.date)} · ${esc(e.pair || "")}</span></div>
+  <header style="display:grid;gap:8px"><h1>${esc(e.pair || "Entry")} <span class="muted" style="font-weight:500">${esc(e.dir || "")}</span></h1><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill">${esc(e.kind || "")}</span>${e.model ? `<span class="pill">${esc(e.model)}</span>` : ""}${e.result ? `<span class="pill ${e.result === "Win" ? "win" : e.result === "Loss" ? "loss" : ""}">${esc(e.result)}${rOf(e) != null ? ` · ${rOf(e)}R` : ""}</span>` : ""}${e.grade ? `<span class="pill gold">Grade ${esc(e.grade)}</span>` : ""}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" id="jEdit" type="button">Edit</button><button class="btn danger" id="jDel" type="button">Delete</button></div><div id="jConfirm"></div></header>`;
+  for (const [si, S] of JOURNAL.entries()) {
+    const rows = S.fields.filter(f => f[2] !== "images" && fieldFilled(e, f));
+    const imgs = S.fields.filter(f => f[2] === "images").flatMap(f => e[f[0]] || []);
+    if (!rows.length && !imgs.length) continue;
+    h += `<section class="sec"><h2>${esc(S.step)}</h2>${imgs.length ? `<div class="viewimgs" data-imgs="${si}"></div>` : ""}${rows.length ? `<div class="kv">${rows.map(f => { const v = e[f[0]]; return `<div>${esc(f[1])}</div><div>${esc(Array.isArray(v) ? v.join(", ") : v)}</div>`; }).join("")}</div>` : ""}</section>`;
+  }
+  view.innerHTML = h; window.scrollTo(0, 0);
+  for (const [si, S] of JOURNAL.entries()) { const box = view.querySelector(`[data-imgs="${si}"]`); if (!box) continue; const imgs = S.fields.filter(f => f[2] === "images").flatMap(f => e[f[0]] || []); const urls = await Promise.all(imgs.map(imgURL)); box.innerHTML = urls.map((u, i) => `<img src="${esc(u)}" alt="${esc(S.step)} chart ${i + 1}" loading="lazy">`).join(""); }
+  $("#jBack").onclick = ev => { ev.preventDefault(); Store.editing = null; renderJournal(); };
+  $("#jEdit").onclick = () => openEditor(e, 0);
+  $("#jDel").onclick = () => { $("#jConfirm").innerHTML = `<div class="confirm"><span>Delete this entry and its screenshots? This cannot be undone.</span><button class="btn sm danger" id="jYes" type="button">Delete</button><button class="btn sm" id="jNo" type="button">Keep</button></div>`; $("#jNo").onclick = () => $("#jConfirm").innerHTML = ""; $("#jYes").onclick = async () => { try { await deleteEntry(id); toast("Deleted"); } catch { toast("Not deleted. Try again."); } Store.editing = null; renderJournal(); }; };
+}
+async function exportJournal() {
+  const out = [];
+  for (const e of Store.entries) {
+    const c = JSON.parse(JSON.stringify(e));
+    for (const k of ["htfImg", "m15Img", "exImg"]) if (c[k]) c[k] = await Promise.all(c[k].map(async im => { if (im.lid) { const b = Store.mode === "local" ? await idbDo("imgs", "readonly", s => s.get(im.lid)) : (Store.mem || {})[im.lid]; if (b) return { data: await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(b); }) }; } return im; }));
+    out.push(c);
+  }
+  const text = JSON.stringify({ app: "mmxm-desk", v: 1, exported: new Date().toISOString(), entries: out }, null, 1);
+  const name = `mmxm-journal-${todayKey()}.json`;
+  if (Store.dl) { try { await Store.dl.save({ filename: name, data: text }); toast("Export ready"); return; } catch { toast("Export cancelled"); return; } }
+  try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: "application/json" })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); toast("Export downloaded"); } catch { toast("Export is not available here."); }
+}
+async function importJournal(ev) {
+  const f = ev.target.files[0]; if (!f) return;
+  try {
+    const j = JSON.parse(await f.text()); const list = j.entries || [];
+    let n = 0;
+    for (const e of list) {
+      if (!e.id || !String(e.id).startsWith("t_")) continue;
+      for (const k of ["htfImg", "m15Img", "exImg"]) if (e[k]) e[k] = await Promise.all(e[k].map(async im => { if (im.data) { try { const b = await (await fetch(im.data)).blob(); return await storeImage(new File([b], "img.jpg", { type: b.type || "image/jpeg" })); } catch { return im; } } return im; }));
+      await saveEntry(e); n++;
+    }
+    toast(`Imported ${n} entries`); renderJournal();
+  } catch { toast("That file is not a journal export."); }
+}
+
+/* ---------------- boot ---------------- */
+if ("serviceWorker" in navigator && window.PWA_STANDALONE) { navigator.serviceWorker.register("sw.js").catch(() => {}); }
+route();
+})();
+
+</script>
+</body></html>
